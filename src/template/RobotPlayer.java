@@ -1,6 +1,7 @@
 package template;
 
 import battlecode.common.*;
+import static template.Constants.*;
 
 public class RobotPlayer {
 	public static void run(RobotController robotController) throws GameActionException {
