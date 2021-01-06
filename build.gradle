@@ -13,7 +13,7 @@ apply plugin: 'scala'
 apply plugin: 'idea'
 
 ext.versions = [
-    battlecode: new File(projectDir, "version.txt").text.trim()
+        battlecode: new File(projectDir, "version.txt").text.trim()
 ]
 
 // Battlecode updates a lot.

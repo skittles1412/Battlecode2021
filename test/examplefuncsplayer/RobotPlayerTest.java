@@ -1,6 +1,7 @@
 package examplefuncsplayer;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 public class RobotPlayerTest {
