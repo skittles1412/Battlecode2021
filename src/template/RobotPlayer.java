@@ -15,6 +15,16 @@ public class RobotPlayer {
 				break;
 			case SLANDERER:
 				robot = new Slanderer(robotController);
+				while(robotController.getType()==RobotType.SLANDERER) {
+					try {
+						robot.processRound();
+						Clock.yield();
+					}catch(Exception e) {
+						System.out.println(robotController.getType()+" Exception");
+						e.printStackTrace();
+					}
+				}
+				robot = new Politician(robotController);
 				break;
 			case MUCKRAKER:
 				robot = new Muckraker(robotController);
