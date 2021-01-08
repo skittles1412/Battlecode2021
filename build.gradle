@@ -73,7 +73,7 @@ dependencies {
     // Scala!
     implementation 'org.scala-lang:scala-library:2.11.7'
     testImplementation 'org.scalatest:scalatest_2.11:3.0.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
 }
 
 // IntelliJ settings.

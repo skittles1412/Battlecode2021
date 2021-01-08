@@ -4,7 +4,10 @@ import battlecode.common.*;
 import static template.Constants.*;
 
 public class RobotPlayer {
+	public static final int a = 0;
 	public static void run(RobotController robotController) throws GameActionException {
+		System.out.println(Clock.getBytecodeNum());
+		robotController.resign();
 		Robot robot;
 		switch(robotController.getType()) {
 			case ENLIGHTENMENT_CENTER:
