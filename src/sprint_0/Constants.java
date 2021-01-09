@@ -11,7 +11,4 @@ public class Constants {
 	public static final int[][] POLITICIAN_SENSE = Arrays.copyOfRange(ENLIGHTENMENT_CENTER_SENSE, 0, 81);
 	public static final int[][] SLANDERER_SENSE = Arrays.copyOfRange(ENLIGHTENMENT_CENTER_SENSE, 0, 69);
 	public static final int[][] MUCKRAKER_SENSE = Arrays.copyOfRange(ENLIGHTENMENT_CENTER_SENSE, 0, 97);
-	//20 69
-	//25 81
-	//30 97
 }
