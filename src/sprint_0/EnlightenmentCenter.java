@@ -11,15 +11,17 @@ public class EnlightenmentCenter implements Robot {
 	private int ind = 0;
 	private final int[] built;
 	private final RobotController robotController;
+	final Direction[] sortedDirections = {Direction.NORTH,Direction.NORTHEAST,Direction.EAST,Direction.SOUTHEAST,Direction.SOUTH,Direction.SOUTHWEST,Direction.WEST,Direction.NORTHWEST,Direction.CENTER};
 
 	public EnlightenmentCenter(RobotController robotController) {
 		this.robotController = robotController;
 		built = new int[1500];
 		System.out.println(Clock.getBytecodeNum());
-		Arrays.sort(DIRECTIONS, Comparator.comparingDouble(o-> {
+		Arrays.sort(sortedDirections, Comparator.comparingDouble(o -> {
 			try {
-				return 1/robotController.sensePassability(robotController.getLocation().add(o));
-			}catch(GameActionException e) {
+			    // -x and 1/x will still create the same ordering
+				return -robotController.sensePassability(robotController.getLocation().add(o));
+			} catch(GameActionException e) {
 				throw new RuntimeException(e);
 			}
 		}));
