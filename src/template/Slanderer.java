@@ -1,6 +1,7 @@
 package template;
 
 import battlecode.common.*;
+
 import static template.Constants.*;
 
 public class Slanderer implements Robot {

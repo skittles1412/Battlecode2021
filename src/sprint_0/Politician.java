@@ -1,13 +1,13 @@
-package template;
+package sprint_0;
 
 import battlecode.common.*;
 
-import static template.Constants.*;
+import static sprint_0.Constants.*;
 
-public class Muckraker implements Robot {
+public class Politician implements Robot {
 	private final RobotController robotController;
 
-	public Muckraker(RobotController robotController) {
+	public Politician(RobotController robotController) {
 		this.robotController = robotController;
 	}
 

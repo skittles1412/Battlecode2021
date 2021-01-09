@@ -1,8 +1,8 @@
-package template;
+package sprint_0;
 
 import battlecode.common.*;
 
-import static template.Constants.*;
+import static sprint_0.Constants.*;
 
 public class Muckraker implements Robot {
 	private final RobotController robotController;
@@ -13,6 +13,6 @@ public class Muckraker implements Robot {
 
 	@Override
 	public void processRound() throws GameActionException {
-
+		
 	}
 }
