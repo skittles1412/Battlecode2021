@@ -2,9 +2,6 @@ package sprint_0;
 
 import battlecode.common.*;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import static sprint_0.Constants.*;
 
 public class Muckraker implements Robot {
@@ -129,10 +126,6 @@ public class Muckraker implements Robot {
 			}
 			if(cost7<min) {
 				moveDirection = Direction.NORTHWEST;
-				min = cost7;
-			}
-			if(robotController.getRoundNum()==1000) {
-				System.out.println(Clock.getBytecodeNum());
 			}
 			if(robotController.canMove(moveDirection)) {
 				robotController.move(moveDirection);

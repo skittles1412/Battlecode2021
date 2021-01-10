@@ -2,8 +2,6 @@ package sprint_0;
 
 import battlecode.common.Direction;
 
-import java.util.Arrays;
-
 public class Constants {
 	public static final int MESSAGE_HASH = 1;
 	public static final Direction[] DIRECTIONS = Direction.allDirections();

@@ -1,12 +1,12 @@
-package utilities;
+package template;
 
 import battlecode.common.MapLocation;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static utilities.Communications.*;
+import static template.Communicator.*;
 
-class CommunicationsTest {
+class CommunicatiorTest {
 	@Test
 	void locationTest() {
 		int n = 20000;
