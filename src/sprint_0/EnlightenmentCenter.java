@@ -11,12 +11,11 @@ public class EnlightenmentCenter implements Robot {
 	private int ind = 0;
 	private final int[] built;
 	private final RobotController robotController;
-	final Direction[] sortedDirections = {Direction.NORTH,Direction.NORTHEAST,Direction.EAST,Direction.SOUTHEAST,Direction.SOUTH,Direction.SOUTHWEST,Direction.WEST,Direction.NORTHWEST,Direction.CENTER};
+	private final Direction[] sortedDirections = DIRECTIONS;
 
 	public EnlightenmentCenter(RobotController robotController) {
 		this.robotController = robotController;
 		built = new int[1500];
-		System.out.println(Clock.getBytecodeNum());
 		Arrays.sort(sortedDirections, Comparator.comparingDouble(o -> {
 			try {
 			    // -x and 1/x will still create the same ordering
@@ -25,7 +24,6 @@ public class EnlightenmentCenter implements Robot {
 				throw new RuntimeException(e);
 			}
 		}));
-		System.out.println(Clock.getBytecodeNum());
 	}
 
 	@Override
@@ -39,7 +37,7 @@ public class EnlightenmentCenter implements Robot {
 	private int build(RobotType type, int influence) throws GameActionException {
 		//assume influence <= my influence
 		if(robotController.isReady()) {
-			for(Direction direction: DIRECTIONS) {
+			for(Direction direction: sortedDirections) {
 				if(robotController.canBuildRobot(type, direction, influence)) {
 					robotController.buildRobot(type, direction, influence);
 					return built[ind++] = robotController.senseRobotAtLocation(robotController.getLocation().add(direction)).ID;
