@@ -4,15 +4,14 @@ import battlecode.common.*;
 
 import static template.Constants.*;
 
-public class Politician implements Robot {
-	private final RobotController robotController;
+public class Politician {
+	public static RobotController robotController;
 
-	public Politician(RobotController robotController) {
-		this.robotController = robotController;
+	public static void initialize(RobotController robotController) {
+		Politician.robotController = robotController;
 	}
 
-	@Override
-	public void processRound() throws GameActionException {
+	public static void processRound() throws GameActionException {
 
 	}
 }

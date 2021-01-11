@@ -4,15 +4,14 @@ import battlecode.common.*;
 
 import static template.Constants.*;
 
-public class EnlightenmentCenter implements Robot {
-	private final RobotController robotController;
+public class EnlightenmentCenter {
+	public static RobotController robotController;
 
-	public EnlightenmentCenter(RobotController robotController) {
-		this.robotController = robotController;
+	public static void initialize(RobotController robotController) {
+		EnlightenmentCenter.robotController = robotController;
 	}
 
-	@Override
-	public void processRound() throws GameActionException {
+	public static void processRound() throws GameActionException {
 
 	}
 }

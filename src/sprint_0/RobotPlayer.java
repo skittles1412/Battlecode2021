@@ -4,41 +4,53 @@ import battlecode.common.*;
 
 public class RobotPlayer {
 	public static void run(RobotController robotController) throws GameActionException {
-		Robot robot;
 		switch(robotController.getType()) {
 			case ENLIGHTENMENT_CENTER:
-				robot = new EnlightenmentCenter(robotController);
-				break;
-			case POLITICIAN:
-				robot = new Politician(robotController);
-				break;
-			case SLANDERER:
-				robot = new Slanderer(robotController);
-				while(robotController.getType()==RobotType.SLANDERER) {
+				EnlightenmentCenter.initialize(robotController);
+				while(true) {
 					try {
-						robot.processRound();
+						EnlightenmentCenter.processRound();
 						Clock.yield();
 					}catch(Exception e) {
 						System.out.println(robotController.getType()+" Exception");
 						e.printStackTrace();
 					}
 				}
-				robot = new Politician(robotController);
-				break;
+			case SLANDERER:
+				Slanderer.initialize(robotController);
+				while(robotController.getType()==RobotType.SLANDERER) {
+					try {
+						Slanderer.processRound();
+						Clock.yield();
+					}catch(Exception e) {
+						System.out.println(robotController.getType()+" Exception");
+						e.printStackTrace();
+					}
+				}
+			case POLITICIAN:
+				Politician.initialize(robotController);
+				while(true) {
+					try {
+						Politician.processRound();
+						Clock.yield();
+					}catch(Exception e) {
+						System.out.println(robotController.getType()+" Exception");
+						e.printStackTrace();
+					}
+				}
 			case MUCKRAKER:
-				robot = new Muckraker(robotController);
-				break;
+				Muckraker.initialize(robotController);
+				while(true) {
+					try {
+						Muckraker.processRound();
+						Clock.yield();
+					}catch(Exception e) {
+						System.out.println(robotController.getType()+" Exception");
+						e.printStackTrace();
+					}
+				}
 			default:
 				throw new IllegalArgumentException("Unexpected robot type");
-		}
-		while(true) {
-			try {
-				robot.processRound();
-				Clock.yield();
-			}catch(Exception e) {
-				System.out.println(robotController.getType()+" Exception");
-				e.printStackTrace();
-			}
 		}
 	}
 }

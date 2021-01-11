@@ -4,15 +4,14 @@ import battlecode.common.*;
 
 import static template.Constants.*;
 
-public class Muckraker implements Robot {
-	private final RobotController robotController;
+public class Muckraker {
+	public static RobotController robotController;
 
-	public Muckraker(RobotController robotController) {
-		this.robotController = robotController;
+	public static void initialize(RobotController robotController) {
+		Muckraker.robotController = robotController;
 	}
 
-	@Override
-	public void processRound() throws GameActionException {
+	public static void processRound() throws GameActionException {
 
 	}
 }

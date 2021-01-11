@@ -3,8 +3,20 @@ package template;
 import battlecode.common.*;
 
 public abstract class Communicator {
+	public static RobotController robotController;
+
 	//xor every message by this
 	public static final int MESSAGE_HASH = 4923936;
+
+	//helper methods
+	//inline if necessary to save bytecode
+	public static void setFlag(int flag) throws GameActionException {
+		robotController.setFlag(flag^MESSAGE_HASH);
+	}
+
+	public static int getFlag(int id) throws GameActionException {
+		return robotController.getFlag(id)^MESSAGE_HASH;
+	}
 
 	//location sending
 	public static final int LOCATION_MOD = 128;
@@ -29,20 +41,7 @@ public abstract class Communicator {
 		throw new IllegalArgumentException("There can't be two cells with distance greater than 64");
 	}
 
-	protected final RobotController robotController;
-
-	public Communicator(RobotController robotController) throws GameActionException {
-		this.robotController = robotController;
-		setFlag(0);
-	}
-
-	//helper methods
-	//inline if necessary to save bytecode
-	protected void setFlag(int flag) throws GameActionException {
-		robotController.setFlag(flag^MESSAGE_HASH);
-	}
-
-	protected int getFlag(int id) throws GameActionException {
-		return robotController.getFlag(id)^MESSAGE_HASH;
+	public static void initialize(RobotController robotController) throws GameActionException {
+		Communicator.robotController = robotController;
 	}
 }
