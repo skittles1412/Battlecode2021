@@ -1,6 +1,7 @@
 package sprint_0;
 
 import battlecode.common.*;
+import template.FastRandom;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,12 +30,12 @@ public class EnlightenmentCenter {
 		if(voted&&robotController.getTeamVotes()==lastVoteCount&&vote<20) {
 			vote += 2;
 		}
-		if(vote>2&&rand.nextInt(15)==0) {
+		if(vote>2&& FastRandom.nextInt(15)==0) {
 			vote -= 2;
 		}
 		build(RobotType.MUCKRAKER, 1);
 		voted = false;
-		if(robotController.getRoundNum()>=100&&robotController.getInfluence()>=50&&robotController.getTeamVotes()<=1500&&rand.nextInt(7)<5) {
+		if(robotController.getRoundNum()>=100&&robotController.getInfluence()>=50&&robotController.getTeamVotes()<=1500&&FastRandom.nextInt(7)<5) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
 			robotController.bid(vote);
