@@ -26,6 +26,9 @@ public class EnlightenmentCenter {
 
 	public static void processRound() throws GameActionException {
 		build(RobotType.MUCKRAKER, 1);
+		if (robotController.getInfluence() >= 10) {
+			robotController.bid(2);
+		}
 	}
 
 	/**
