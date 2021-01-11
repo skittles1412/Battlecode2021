@@ -8,7 +8,8 @@ import java.util.Comparator;
 import static sprint_0.Constants.*;
 
 public class EnlightenmentCenter {
-	public static int ind = 0;
+	public static int vote = 2, lastVoteCount;
+	public static boolean voted = false;
 	public static RobotController robotController;
 	public static final Direction[] sortedDirections = Direction.values();
 
@@ -18,16 +19,25 @@ public class EnlightenmentCenter {
 			try {
 				// -x and 1/x will still create the same ordering
 				return -robotController.sensePassability(robotController.getLocation().add(o));
-			} catch(GameActionException e) {
+			}catch(GameActionException e) {
 				throw new RuntimeException(e);
 			}
 		}));
 	}
 
 	public static void processRound() throws GameActionException {
+		if(voted&&robotController.getTeamVotes()==lastVoteCount&&vote<20) {
+			vote += 2;
+		}
+		if(vote>2&&rand.nextInt(15)==0) {
+			vote -= 2;
+		}
 		build(RobotType.MUCKRAKER, 1);
-		if (robotController.getInfluence() >= 10) {
-			robotController.bid(2);
+		voted = false;
+		if(robotController.getRoundNum()>=100&&robotController.getInfluence()>=50&&robotController.getTeamVotes()<=1500&&rand.nextInt(7)<5) {
+			voted = true;
+			lastVoteCount = robotController.getTeamVotes();
+			robotController.bid(vote);
 		}
 	}
 
