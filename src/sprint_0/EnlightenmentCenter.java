@@ -27,7 +27,7 @@ public class EnlightenmentCenter {
 	}
 
 	public static void processRound() throws GameActionException {
-		if(voted&&robotController.getTeamVotes()==lastVoteCount&&vote<20) {
+		if(voted&&robotController.getTeamVotes()==lastVoteCount) {
 			vote += 2;
 		}
 		if(vote>2&& FastRandom.nextInt(15)==0) {
@@ -35,7 +35,8 @@ public class EnlightenmentCenter {
 		}
 		build(RobotType.MUCKRAKER, 1);
 		voted = false;
-		if(robotController.getRoundNum()>=100&&robotController.getInfluence()>=50&&robotController.getTeamVotes()<=1500&&FastRandom.nextInt(7)<5) {
+		if(robotController.getRoundNum()>=100&&robotController.getInfluence()>=Math.max(50, vote)
+				&&FastRandom.nextInt(3000-robotController.getRoundNum())<(1500-robotController.getTeamVotes())/0.7) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
 			robotController.bid(vote);
