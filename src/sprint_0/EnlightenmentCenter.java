@@ -1,7 +1,7 @@
 package sprint_0;
 
 import battlecode.common.*;
-import template.FastRandom;
+import sprint_0.FastRandom;
 
 import java.util.Arrays;
 import java.util.Comparator;
