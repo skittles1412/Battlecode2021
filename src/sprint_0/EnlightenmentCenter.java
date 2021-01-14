@@ -12,17 +12,20 @@ public class EnlightenmentCenter {
 	public static int vote = 2, lastVoteCount;
 	public static boolean voted = false;
 	public static RobotController robotController;
-	public static final Direction[] sortedDirections = Direction.values();
+	public static final Direction[] sortedDirections = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
 	public static void initialize(RobotController robotController) {
 		EnlightenmentCenter.robotController = robotController;
-		Arrays.sort(sortedDirections, Comparator.comparingDouble(o -> {
+		double[] val = new double[8];
+		MapLocation myLocation = robotController.getLocation();
+		for(int i = 8; --i>=0; ) {
 			try {
-				// -x and 1/x will still create the same ordering
-				return -robotController.sensePassability(robotController.getLocation().add(o));
-			}catch(GameActionException e) {
-				throw new RuntimeException(e);
+				val[i] = robotController.sensePassability(myLocation.add(sortedDirections[i]));
+			}catch(GameActionException ignored) {
 			}
+		}
+		Arrays.sort(sortedDirections, Comparator.comparingDouble(o -> {
+			return val[o.ordinal()];
 		}));
 	}
 
@@ -35,8 +38,8 @@ public class EnlightenmentCenter {
 		}
 		build(RobotType.MUCKRAKER, 1);
 		voted = false;
-		if(robotController.getInfluence()>=Math.max(50, vote)
-				/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
+		if(robotController.getInfluence()>=Math.max(50, vote)&&robotController.getTeamVotes()<750
+			/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
 			robotController.bid(vote);
@@ -49,7 +52,8 @@ public class EnlightenmentCenter {
 	private static int build(RobotType type, int influence) throws GameActionException {
 		//assume influence <= my influence
 		if(robotController.isReady()) {
-			for(Direction direction: sortedDirections) {
+			for(int i = 8; --i>=0; ) {
+				Direction direction = sortedDirections[i];
 				if(robotController.canBuildRobot(type, direction, influence)) {
 					robotController.buildRobot(type, direction, influence);
 					return robotController.senseRobotAtLocation(robotController.getLocation().add(direction)).ID;
