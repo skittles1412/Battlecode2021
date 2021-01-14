@@ -30,13 +30,13 @@ public class EnlightenmentCenter {
 		if(voted&&robotController.getTeamVotes()==lastVoteCount) {
 			vote += 2;
 		}
-		if(vote>2&& FastRandom.nextInt(15)==0) {
+		if(vote>2&&FastRandom.nextInt(15)==0) {
 			vote -= 2;
 		}
 		build(RobotType.MUCKRAKER, 1);
 		voted = false;
 		if(robotController.getInfluence()>=Math.max(50, vote)
-				&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7) {
+				/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
 			robotController.bid(vote);
