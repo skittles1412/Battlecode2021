@@ -12,7 +12,7 @@ public class EnlightenmentCenter {
 	public static boolean voted = false;
 	public static RobotController robotController;
 	public static HashSet<MapLocation> processedECs;
-	public static TreeMap<MapLocation, Integer> toProcessECs;
+	public static HashMap<MapLocation, Integer> toProcessECs;
 	public static MapLocation myLocation;
 	public static final Direction[] CARDINAL_DIRECTIONS = Direction.cardinalDirections();
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
@@ -22,7 +22,7 @@ public class EnlightenmentCenter {
 		double[] val = new double[8];
 		myLocation = robotController.getLocation();
 		processedECs = new HashSet<>();
-		toProcessECs = new TreeMap<>(Comparator.comparingInt(o -> myLocation.distanceSquaredTo(o)));
+		toProcessECs = new HashMap<>();
 		for(int i = 8; --i>=0; ) {
 			try {
 				val[i] = robotController.sensePassability(myLocation.add(DIRECTIONS[i]));
@@ -47,7 +47,7 @@ public class EnlightenmentCenter {
 						int prefix = decodePrefix(flag);
 						if(prefix!=0) {
 							int influence = prefix-512;
-							if(influence<=300) {
+							if(influence<=250) {
 								MapLocation location = decodeLocation(myLocation, flag);
 								if(!processedECs.contains(location)) {
 									toProcessECs.put(location, influence);
@@ -62,13 +62,23 @@ public class EnlightenmentCenter {
 		}
 		//process spawning
 		if(robotController.isReady()) {
-			if(robotController.getInfluence()>=411&&!toProcessECs.isEmpty()) {//attack ec
-				Map.Entry<MapLocation, Integer> target = toProcessECs.firstEntry();
-				Direction buildDirection;
-				if((buildDirection = build(DIRECTIONS, RobotType.POLITICIAN, target.getValue()+11))!=null) {
-					nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(target.getKey()));
-					toProcessECs.pollFirstEntry();
-					processedECs.add(target.getKey());
+			if(!toProcessECs.isEmpty()) {//attack ec
+				MapLocation location = null;
+				int influence = Integer.MAX_VALUE;
+				for(Map.Entry<MapLocation, Integer> target: toProcessECs.entrySet()) {
+					if(target.getValue()<influence) {
+						location = target.getKey();
+						influence = target.getValue();
+					}
+				}
+				int spawn = influence+11;
+				if(robotController.getInfluence()-spawn>=100) {
+					Direction buildDirection;
+					if((buildDirection = build(DIRECTIONS, RobotType.POLITICIAN, spawn))!=null) {
+						nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(location));
+						toProcessECs.remove(location);
+						processedECs.add(location);
+					}
 				}
 			}else if(++lastSelfEmpower>=10&&robotController.getInfluence()<=9e7&&
 					(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
@@ -108,7 +118,7 @@ public class EnlightenmentCenter {
 			vote -= 2;
 		}
 		voted = false;
-		if(robotController.getInfluence()>=Math.max(400, vote)&&robotController.getTeamVotes()<750
+		if(robotController.getInfluence()>=Math.max(350, vote)&&robotController.getTeamVotes()<750
 			/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
