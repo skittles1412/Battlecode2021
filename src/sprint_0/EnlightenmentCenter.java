@@ -38,7 +38,7 @@ public class EnlightenmentCenter {
 		}
 		build(RobotType.MUCKRAKER, 1);
 		voted = false;
-		if(robotController.getInfluence()>=Math.max(50, vote)&&robotController.getTeamVotes()<750
+		if(robotController.getInfluence()>=Math.max(150, vote)&&robotController.getTeamVotes()<750
 			/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 			voted = true;
 			lastVoteCount = robotController.getTeamVotes();
