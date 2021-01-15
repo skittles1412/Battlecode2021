@@ -14,18 +14,25 @@ public class Muckraker {
 
 	public static void processRound() throws GameActionException {
 		//calculate flag before returning
+		//flag is basically a heuristic of the current position
+		//it allows other muckrakers to come here despite of the repelling
+		//basically a heuristic getting muckrakers to come near opponent ec and slanderers
+		//larger flag = better
 		if(!robotController.isReady()) {
 			int flag = 0;
 			MapLocation myLocation = robotController.getLocation();
 			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+			//30 is sensing radius
 			for(int i = nearbyRobots.length; --i>=0; ) {
 				RobotInfo robotInfo = nearbyRobots[i];
 				MapLocation mapLocation = robotInfo.location;
 				switch(robotInfo.type) {
 					case ENLIGHTENMENT_CENTER:
+						//250+25*(30-...)
 						flag += 25*(40-myLocation.distanceSquaredTo(mapLocation));
 						break;
-					case MUCKRAKER:
+					case SLANDERER:
+						//50+10*(30-...)
 						flag += 10*(35-myLocation.distanceSquaredTo(mapLocation));
 				}
 			}
@@ -56,6 +63,8 @@ public class Muckraker {
 			double cost6 = robotController.canMove(Direction.WEST) ? 1.5/robotController.sensePassability(location6) : 1e10;
 			double cost7 = robotController.canMove(Direction.NORTHWEST) ? 1.5/robotController.sensePassability(location7) : 1e10;
 			double cost8 = robotController.sensePassability(location8);
+
+			//get attracted to ec and slanderers on enemy team
 			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
 			int id = 0, influence = -1;
 			for(int i = nearbyRobots.length; --i>=0; ) {
@@ -93,12 +102,15 @@ public class Muckraker {
 				robotController.expose(id);
 				return;
 			}
+
+			//repel from our ecs (for the sake of spawning) and muckrakers
+			//get out of empower radius of politicians
 			nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam());
 			for(int i = nearbyRobots.length; --i>=0; ) {
 				RobotInfo robotInfo = nearbyRobots[i];
 				MapLocation mapLocation = robotInfo.location;
 				switch(robotInfo.type) {
-					case ENLIGHTENMENT_CENTER:
+					case ENLIGHTENMENT_CENTER: {
 //						for(int j = 8; --j>=0; ) {
 //							cost[j] -= 7*mapLocation.distanceSquaredTo(locations[j]);
 //						}
@@ -112,7 +124,8 @@ public class Muckraker {
 						cost7 -= 2.5*mapLocation.distanceSquaredTo(location7);
 						cost8 -= 2.5*mapLocation.distanceSquaredTo(location8);
 						break;
-					case MUCKRAKER:
+					}
+					case MUCKRAKER: {
 //						for(int j = 8; --j>=0; ) {
 //							cost[j] -= 3*mapLocation.distanceSquaredTo(locations[j]);
 //						}
@@ -127,6 +140,21 @@ public class Muckraker {
 						cost7 -= mapLocation.distanceSquaredTo(location7)+flag;
 						cost8 -= mapLocation.distanceSquaredTo(location8)+flag;
 						break;
+					}
+					case POLITICIAN: {
+						int flag = robotController.getFlag(robotInfo.ID)+1;
+						if(flag!=0) {
+							cost0 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
+							cost1 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
+							cost2 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
+							cost3 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location3));
+							cost4 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location4));
+							cost5 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location5));
+							cost6 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location6));
+							cost7 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location7));
+							cost8 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location8));
+						}
+					}
 				}
 			}
 			//find next place to move
