@@ -24,7 +24,6 @@ public class Politician {
 				}
 			}
 		}
-		System.out.println(target);
 	}
 
 	public static void processRound() throws GameActionException {
