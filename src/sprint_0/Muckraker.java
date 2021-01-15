@@ -3,40 +3,52 @@ package sprint_0;
 import battlecode.common.*;
 
 import static sprint_0.Constants.*;
+import static sprint_0.Communications.*;
 
 public class Muckraker {
 	//	public static final int[][] MUCKRAKER_SENSE = {{0, 0}, {-1, 0}, {0, -1}, {0, 1}, {1, 0}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}, {-2, 0}, {0, -2}, {0, 2}, {2, 0}, {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}, {-2, -2}, {-2, 2}, {2, -2}, {2, 2}, {-3, 0}, {0, -3}, {0, 3}, {3, 0}, {-3, -1}, {-3, 1}, {-1, -3}, {-1, 3}, {1, -3}, {1, 3}, {3, -1}, {3, 1}, {-3, -2}, {-3, 2}, {-2, -3}, {-2, 3}, {2, -3}, {2, 3}, {3, -2}, {3, 2}, {-4, 0}, {0, -4}, {0, 4}, {4, 0}, {-4, -1}, {-4, 1}, {-1, -4}, {-1, 4}, {1, -4}, {1, 4}, {4, -1}, {4, 1}, {-3, -3}, {-3, 3}, {3, -3}, {3, 3}, {-4, -2}, {-4, 2}, {-2, -4}, {-2, 4}, {2, -4}, {2, 4}, {4, -2}, {4, 2}, {-5, 0}, {-4, -3}, {-4, 3}, {-3, -4}, {-3, 4}, {0, -5}, {0, 5}, {3, -4}, {3, 4}, {4, -3}, {4, 3}, {5, 0}, {-5, -1}, {-5, 1}, {-1, -5}, {-1, 5}, {1, -5}, {1, 5}, {5, -1}, {5, 1}, {-5, -2}, {-5, 2}, {-2, -5}, {-2, 5}, {2, -5}, {2, 5}, {5, -2}, {5, 2}};
+	public static boolean communicated = false;
 	public static RobotController robotController;
 
 	public static void initialize(RobotController robotController) {
 		Muckraker.robotController = robotController;
 	}
 
+	public static void processPathfindingFlag() throws GameActionException {
+		int flag = 0;
+		MapLocation myLocation = robotController.getLocation();
+		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+		//30 is sensing radius
+		for(int i = nearbyRobots.length; --i>=0; ) {
+			RobotInfo robotInfo = nearbyRobots[i];
+			MapLocation mapLocation = robotInfo.location;
+			switch(robotInfo.type) {
+				case ENLIGHTENMENT_CENTER:
+					//250+25*(30-...)
+					flag += 25*(40-myLocation.distanceSquaredTo(mapLocation));
+					break;
+				case SLANDERER:
+					//50+10*(30-...)
+					flag += 10*(35-myLocation.distanceSquaredTo(mapLocation));
+			}
+		}
+		robotController.setFlag(flag);
+	}
+
 	public static void processRound() throws GameActionException {
 		//calculate flag before returning
 		//flag is basically a heuristic of the current position
 		//it allows other muckrakers to come here despite of the repelling
-		//basically a heuristic getting muckrakers to come near opponent ec and slanderers
+		//basically a heuristic getting muckrakers to come near opponent EC and slanderers
 		//larger flag = better
+		//for muckrakers a flag with prefix 0 means a pathfinding hint and an EC comm otherwise
+		//to ensure that an EC comm will always have the 23rd bit on
+		if(communicated) {
+			processPathfindingFlag();
+			communicated = false;
+		}
 		if(!robotController.isReady()) {
-			int flag = 0;
-			MapLocation myLocation = robotController.getLocation();
-			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
-			//30 is sensing radius
-			for(int i = nearbyRobots.length; --i>=0; ) {
-				RobotInfo robotInfo = nearbyRobots[i];
-				MapLocation mapLocation = robotInfo.location;
-				switch(robotInfo.type) {
-					case ENLIGHTENMENT_CENTER:
-						//250+25*(30-...)
-						flag += 25*(40-myLocation.distanceSquaredTo(mapLocation));
-						break;
-					case SLANDERER:
-						//50+10*(30-...)
-						flag += 10*(35-myLocation.distanceSquaredTo(mapLocation));
-				}
-			}
-			robotController.setFlag(flag);
+			processPathfindingFlag();
 			return;
 		}
 
@@ -64,8 +76,16 @@ public class Muckraker {
 			double cost7 = robotController.canMove(Direction.NORTHWEST) ? 1.5/robotController.sensePassability(location7) : 1e10;
 			double cost8 = robotController.sensePassability(location8);
 
-			//get attracted to ec and slanderers on enemy team
-			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+			//send neutral EC locations
+			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, Team.NEUTRAL);
+			if(nearbyRobots.length>0) {
+				RobotInfo robotInfo = nearbyRobots[0];
+				robotController.setFlag(encodePrefix(512|robotInfo.influence, encodeLocation(robotInfo.location)));
+				communicated = true;
+			}
+
+			//get attracted to EC and slanderers on enemy team
+			nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
 			int id = 0, influence = -1;
 			for(int i = nearbyRobots.length; --i>=0; ) {
 				RobotInfo robotInfo = nearbyRobots[i];
@@ -103,7 +123,7 @@ public class Muckraker {
 				return;
 			}
 
-			//repel from our ecs (for the sake of spawning) and muckrakers
+			//repel from our ECs (for the sake of spawning) and muckrakers
 			//get out of empower radius of politicians
 			nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam());
 			for(int i = nearbyRobots.length; --i>=0; ) {
@@ -130,15 +150,17 @@ public class Muckraker {
 //							cost[j] -= 3*mapLocation.distanceSquaredTo(locations[j]);
 //						}
 						int flag = robotController.getFlag(robotInfo.ID);
-						cost0 -= mapLocation.distanceSquaredTo(location0)+flag;
-						cost1 -= mapLocation.distanceSquaredTo(location1)+flag;
-						cost2 -= mapLocation.distanceSquaredTo(location2)+flag;
-						cost3 -= mapLocation.distanceSquaredTo(location3)+flag;
-						cost4 -= mapLocation.distanceSquaredTo(location4)+flag;
-						cost5 -= mapLocation.distanceSquaredTo(location5)+flag;
-						cost6 -= mapLocation.distanceSquaredTo(location6)+flag;
-						cost7 -= mapLocation.distanceSquaredTo(location7)+flag;
-						cost8 -= mapLocation.distanceSquaredTo(location8)+flag;
+						if(decodePrefix(flag)==0) {
+							cost0 -= mapLocation.distanceSquaredTo(location0)+flag;
+							cost1 -= mapLocation.distanceSquaredTo(location1)+flag;
+							cost2 -= mapLocation.distanceSquaredTo(location2)+flag;
+							cost3 -= mapLocation.distanceSquaredTo(location3)+flag;
+							cost4 -= mapLocation.distanceSquaredTo(location4)+flag;
+							cost5 -= mapLocation.distanceSquaredTo(location5)+flag;
+							cost6 -= mapLocation.distanceSquaredTo(location6)+flag;
+							cost7 -= mapLocation.distanceSquaredTo(location7)+flag;
+							cost8 -= mapLocation.distanceSquaredTo(location8)+flag;
+						}
 						break;
 					}
 					case POLITICIAN: {
