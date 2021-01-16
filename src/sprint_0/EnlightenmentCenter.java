@@ -7,7 +7,7 @@ import java.util.*;
 import static sprint_0.Communications.*;
 
 public class EnlightenmentCenter {
-	public static int vote = 2, lastVoteCount, selfEmpowerID = 0, spawnInd = 0, nextFlag = 0;
+	public static int vote = 2, lastVoteCount, lastVoteRound = -1, selfEmpowerID = 0, spawnInd = 0, nextFlag = 0;
 	public static int[] spawned;
 	public static boolean voted = false;
 	public static RobotController robotController;
@@ -35,6 +35,7 @@ public class EnlightenmentCenter {
 	public static void processRound() throws GameActionException {
 		robotController.setFlag(nextFlag);
 		nextFlag = 0;
+		vote();
 		//process comms
 		//TODO: bytecode optimize this currently takes 27k bytecode worst case
 		if(!robotController.isReady()) {
@@ -63,6 +64,7 @@ public class EnlightenmentCenter {
 				}
 			}
 		}
+		vote();
 		//process spawning
 		if(robotController.isReady()) {
 			if(!toProcessECs.isEmpty()) {//attack ec
@@ -94,7 +96,6 @@ public class EnlightenmentCenter {
 				build(DIRECTIONS, RobotType.MUCKRAKER, 1);
 			}
 		}
-		vote();
 	}
 
 	/**
@@ -114,18 +115,21 @@ public class EnlightenmentCenter {
 	}
 
 	private static void vote() throws GameActionException {
-		if(voted&&robotController.getTeamVotes()==lastVoteCount) {
-			vote += 2;
-		}
-		if(vote>2&&FastRandom.nextInt(15)==0) {
-			vote -= 2;
-		}
-		voted = false;
-		if(robotController.getInfluence()>=Math.max(350, vote)&&robotController.getTeamVotes()<=750
-			/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
-			voted = true;
-			lastVoteCount = robotController.getTeamVotes();
-			robotController.bid(vote);
+		if(robotController.getRoundNum()!=lastVoteRound) {
+			if(voted&&robotController.getTeamVotes()==lastVoteCount) {
+				vote += 2;
+			}
+			if(vote>2&&FastRandom.nextInt(15)==0) {
+				vote -= 2;
+			}
+			voted = false;
+			if(robotController.getInfluence()>=Math.max(350, vote)&&robotController.getTeamVotes()<=750
+				/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
+				voted = true;
+				lastVoteCount = robotController.getTeamVotes();
+				lastVoteRound = robotController.getRoundNum();
+				robotController.bid(vote);
+			}
 		}
 	}
 }
