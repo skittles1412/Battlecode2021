@@ -91,36 +91,16 @@ public class Politician {
 		cost7 += 1.5*dist7;
 		cost8 += 1.5*dist8;
 		//avoid possible targets which would reduce empower effectiveness
-		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots();
-		for(int i = nearbyRobots.length; --i>=0; ) {
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist0) {
-				cost0++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist1) {
-				cost1++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist2) {
-				cost2++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist3) {
-				cost3++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist4) {
-				cost4++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist5) {
-				cost5++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist6) {
-				cost6++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist7) {
-				cost7++;
-			}
-			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist8) {
-				cost8++;
-			}
-		}
+		//800 bytecode but probably more efficient than a for loop
+		cost0 += robotController.senseNearbyRobots(dist0).length;
+		cost1 += robotController.senseNearbyRobots(dist1).length;
+		cost2 += robotController.senseNearbyRobots(dist2).length;
+		cost3 += robotController.senseNearbyRobots(dist3).length;
+		cost4 += robotController.senseNearbyRobots(dist4).length;
+		cost5 += robotController.senseNearbyRobots(dist5).length;
+		cost6 += robotController.senseNearbyRobots(dist6).length;
+		cost7 += robotController.senseNearbyRobots(dist7).length;
+		cost8 += robotController.senseNearbyRobots(dist8).length;
 		//find next place to move
 		Direction moveDirection = Direction.NORTH;
 		double min = cost0;
