@@ -62,6 +62,7 @@ public class Politician {
 		MapLocation location5 = robotController.adjacentLocation(Direction.SOUTHWEST);
 		MapLocation location6 = robotController.adjacentLocation(Direction.WEST);
 		MapLocation location7 = robotController.adjacentLocation(Direction.NORTHWEST);
+		MapLocation location8 = robotController.getLocation();
 		double cost0 = robotController.canMove(Direction.NORTH) ? robotController.sensePassability(location0) : 1e10;
 		double cost1 = robotController.canMove(Direction.NORTHEAST) ? robotController.sensePassability(location1) : 1e10;
 		double cost2 = robotController.canMove(Direction.EAST) ? robotController.sensePassability(location2) : 1e10;
@@ -70,14 +71,57 @@ public class Politician {
 		double cost5 = robotController.canMove(Direction.SOUTHWEST) ? robotController.sensePassability(location5) : 1e10;
 		double cost6 = robotController.canMove(Direction.WEST) ? robotController.sensePassability(location6) : 1e10;
 		double cost7 = robotController.canMove(Direction.NORTHWEST) ? robotController.sensePassability(location7) : 1e10;
-		cost0 += 1.5*target.distanceSquaredTo(location0);
-		cost1 += 1.5*target.distanceSquaredTo(location1);
-		cost2 += 1.5*target.distanceSquaredTo(location2);
-		cost3 += 1.5*target.distanceSquaredTo(location3);
-		cost4 += 1.5*target.distanceSquaredTo(location4);
-		cost5 += 1.5*target.distanceSquaredTo(location5);
-		cost6 += 1.5*target.distanceSquaredTo(location6);
-		cost7 += 1.5*target.distanceSquaredTo(location7);
+		double cost8 = robotController.sensePassability(location8);
+		int dist0 = target.distanceSquaredTo(location0);
+		int dist1 = target.distanceSquaredTo(location1);
+		int dist2 = target.distanceSquaredTo(location2);
+		int dist3 = target.distanceSquaredTo(location3);
+		int dist4 = target.distanceSquaredTo(location4);
+		int dist5 = target.distanceSquaredTo(location5);
+		int dist6 = target.distanceSquaredTo(location6);
+		int dist7 = target.distanceSquaredTo(location7);
+		int dist8 = target.distanceSquaredTo(location8);
+		cost0 += 1.5*dist0;
+		cost1 += 1.5*dist1;
+		cost2 += 1.5*dist2;
+		cost3 += 1.5*dist3;
+		cost4 += 1.5*dist4;
+		cost5 += 1.5*dist5;
+		cost6 += 1.5*dist6;
+		cost7 += 1.5*dist7;
+		cost8 += 1.5*dist8;
+		//avoid possible targets which would reduce empower effectiveness
+		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots();
+		for(int i = nearbyRobots.length; --i>=0; ) {
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist0) {
+				cost0++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist1) {
+				cost1++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist2) {
+				cost2++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist3) {
+				cost3++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist4) {
+				cost4++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist5) {
+				cost5++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist6) {
+				cost6++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist7) {
+				cost7++;
+			}
+			if(nearbyRobots[i].location.distanceSquaredTo(target)<=dist8) {
+				cost8++;
+			}
+		}
+		//find next place to move
 		Direction moveDirection = Direction.NORTH;
 		double min = cost0;
 		if(cost1<min) {
@@ -107,6 +151,9 @@ public class Politician {
 		if(cost7<min) {
 			moveDirection = Direction.NORTHWEST;
 			min = cost7;
+		}
+		if(cost8<min) {
+			return;
 		}
 		if(min<1e9) {
 			robotController.move(moveDirection);
