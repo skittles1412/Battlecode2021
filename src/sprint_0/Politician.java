@@ -44,7 +44,7 @@ public class Politician {
 					robotController.empower(dist);
 				}
 			}else {
-				if((dist==1&&++tries==5)||robotInfo.influence+1<=(robotController.getInfluence()-10)/robotController.senseNearbyRobots(dist).length) {
+				if((dist==1&&++tries==5)||robotInfo.influence+1<=(robotController.getConviction()-10)/robotController.senseNearbyRobots(dist).length) {
 					robotController.empower(dist);
 				}
 			}
