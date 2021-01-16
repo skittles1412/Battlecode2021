@@ -7,7 +7,7 @@ import java.util.*;
 import static sprint_0.Communications.*;
 
 public class EnlightenmentCenter {
-	public static int vote = 2, lastVoteCount, lastSelfEmpower = 7, spawnInd = 0, nextFlag = 0;
+	public static int vote = 2, lastVoteCount, selfEmpowerID = 0, spawnInd = 0, nextFlag = 0;
 	public static int[] spawned;
 	public static boolean voted = false;
 	public static RobotController robotController;
@@ -83,11 +83,11 @@ public class EnlightenmentCenter {
 						processedECs.put(location, spawned[spawnInd-1]);
 					}
 				}
-			}else if(++lastSelfEmpower>=10&&robotController.getInfluence()<=9e7&&
+			}else if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()<=9e7&&
 					(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
 				Direction buildDirection;
 				if((buildDirection = build(CARDINAL_DIRECTIONS, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
-					lastSelfEmpower = 0;
+					selfEmpowerID = spawned[spawnInd-1];
 					nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(myLocation));
 				}
 			}else {
