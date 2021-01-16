@@ -1,6 +1,9 @@
 # don't add my battlecode password
 password.txt
 
+
+.idea
+
 dist/*
 build/*
 src/lectureplayer
