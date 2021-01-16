@@ -166,6 +166,7 @@ public class Muckraker {
 					case POLITICIAN: {
 						int flag = robotController.getFlag(robotInfo.ID)+1;
 						if(flag!=0) {
+							flag++;
 							cost0 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
 							cost1 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
 							cost2 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
