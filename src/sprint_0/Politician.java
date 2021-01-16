@@ -28,7 +28,6 @@ public class Politician {
 
 	public static void processRound() throws GameActionException {
 		//calculate flags
-		robotController.setFlag(0);
 		int dist = robotController.getLocation().distanceSquaredTo(target);
 		if(!robotController.isReady()) {
 			if(dist<=9&&robotController.getCooldownTurns()<2) {
