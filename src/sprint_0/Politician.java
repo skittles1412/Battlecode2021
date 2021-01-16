@@ -29,10 +29,10 @@ public class Politician {
 	public static void processRound() throws GameActionException {
 		//calculate flags
 		int dist = robotController.getLocation().distanceSquaredTo(target);
+		if(dist<=9) {
+			robotController.setFlag(dist);
+		}
 		if(!robotController.isReady()) {
-			if(dist<=9&&robotController.getCooldownTurns()<2) {
-				robotController.setFlag(dist);
-			}
 			return;
 		}
 		//empower
