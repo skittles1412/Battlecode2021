@@ -164,18 +164,18 @@ public class Muckraker {
 						break;
 					}
 					case POLITICIAN: {
-						int flag = robotController.getFlag(robotInfo.ID)+1;
+						int flag = robotController.getFlag(robotInfo.ID);
 						if(flag!=0) {
 							flag++;
-							cost0 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
-							cost1 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
-							cost2 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
-							cost3 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location3));
-							cost4 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location4));
-							cost5 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location5));
-							cost6 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location6));
-							cost7 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location7));
-							cost8 -= 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location8));
+							cost0 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
+							cost1 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
+							cost2 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
+							cost3 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location3));
+							cost4 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location4));
+							cost5 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location5));
+							cost6 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location6));
+							cost7 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location7));
+							cost8 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location8));
 						}
 					}
 				}
