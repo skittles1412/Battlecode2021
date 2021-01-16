@@ -11,8 +11,7 @@ public class EnlightenmentCenter {
 	public static int[] spawned;
 	public static boolean voted = false;
 	public static RobotController robotController;
-	public static HashSet<MapLocation> processedECs;
-	public static HashMap<MapLocation, Integer> toProcessECs;
+	public static HashMap<MapLocation, Integer> processedECs, toProcessECs;
 	public static MapLocation myLocation;
 	public static final Direction[] CARDINAL_DIRECTIONS = Direction.cardinalDirections();
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
@@ -21,7 +20,7 @@ public class EnlightenmentCenter {
 		spawned = new int[750];
 		double[] val = new double[8];
 		myLocation = robotController.getLocation();
-		processedECs = new HashSet<>();
+		processedECs = new HashMap<>();
 		toProcessECs = new HashMap<>();
 		for(int i = 8; --i>=0; ) {
 			try {
@@ -49,7 +48,11 @@ public class EnlightenmentCenter {
 							int influence = prefix-512;
 							if(influence<=250) {
 								MapLocation location = decodeLocation(myLocation, flag);
-								if(!processedECs.contains(location)) {
+								Integer assignee = processedECs.get(location);
+								if(assignee==null) {
+									toProcessECs.put(location, influence);
+								}else if(!robotController.canGetFlag(assignee)) {
+									processedECs.remove(location);
 									toProcessECs.put(location, influence);
 								}
 							}
@@ -77,7 +80,7 @@ public class EnlightenmentCenter {
 					if((buildDirection = build(DIRECTIONS, RobotType.POLITICIAN, spawn))!=null) {
 						nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(location));
 						toProcessECs.remove(location);
-						processedECs.add(location);
+						processedECs.put(location, spawned[spawnInd-1]);
 					}
 				}
 			}else if(++lastSelfEmpower>=10&&robotController.getInfluence()<=9e7&&
