@@ -47,7 +47,7 @@ public class EnlightenmentCenter {
 						int prefix = decodePrefix(flag);
 						if(prefix!=0) {
 							int influence = prefix-512;
-							if(influence<=250) {
+							if(influence<=300) {
 								MapLocation location = decodeLocation(myLocation, flag);
 								Integer assignee = processedECs.get(location);
 								if(assignee==null) {
@@ -123,12 +123,16 @@ public class EnlightenmentCenter {
 				vote -= 2;
 			}
 			voted = false;
-			if(robotController.getInfluence()>=Math.max(350, vote)&&robotController.getTeamVotes()<=750
-				/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
-				voted = true;
-				lastVoteCount = robotController.getTeamVotes();
-				lastVoteRound = robotController.getRoundNum();
-				robotController.bid(vote);
+			if(robotController.getTeamVotes()<=750) {
+				if(robotController.getInfluence()>=Math.max(350, vote)
+					/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
+					voted = true;
+					lastVoteCount = robotController.getTeamVotes();
+					lastVoteRound = robotController.getRoundNum();
+					robotController.bid(vote);
+				}else if(robotController.getInfluence()>=100) {
+					robotController.bid(1);
+				}
 			}
 		}
 	}
