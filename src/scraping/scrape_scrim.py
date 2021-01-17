@@ -4,8 +4,9 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
 
-USERNAME = "qpwoeirut"
-PASSWORD = open("password.txt", "r").read().strip()
+CREDENTIALS = open("credentials.txt", "r").readlines()
+USERNAME = CREDENTIALS[0].strip()
+PASSWORD = CREDENTIALS[1].strip()
 PAGES = 1
 
 
