@@ -243,9 +243,11 @@ task run(type: JavaExec, dependsOn: 'build') {
             '-Dbc.game.team-a.url=' + project.property('classLocation'),
             '-Dbc.game.team-b.url=' + project.property('classLocation'),
             '-Dbc.game.maps=' + project.property('maps'),
-            '-Dbc.server.save-file=' + project.property('replay')
+            '-Dbc.server.save-file=' + project.property('replay'),
+            '-Dbc.testing.logLevel=' + project.property('logLevel')
     ]
 }
+
 task runFromClient(type: JavaExec, dependsOn: 'build') {
     main = 'battlecode.server.Main'
     classpath = project.sourceSets.main.runtimeClasspath
@@ -263,7 +265,8 @@ task runFromClient(type: JavaExec, dependsOn: 'build') {
             '-Dbc.game.team-a.url=' + project.property('classLocation'),
             '-Dbc.game.team-b.url=' + project.property('classLocation'),
             '-Dbc.game.maps=' + project.property('maps'),
-            '-Dbc.server.save-file=' + project.property('replay')
+            '-Dbc.server.save-file=' + project.property('replay'),
+            '-Dbc.testing.logLevel' + project.property('logLevel')
     ]
 }
 task runDebug(type: JavaExec, dependsOn: 'build') {
@@ -284,7 +287,8 @@ task runDebug(type: JavaExec, dependsOn: 'build') {
             '-Dbc.game.team-a.url=' + project.property('classLocation'),
             '-Dbc.game.team-b.url=' + project.property('classLocation'),
             '-Dbc.game.maps=' + project.property('maps'),
-            '-Dbc.server.save-file=' + project.property('replay')
+            '-Dbc.server.save-file=' + project.property('replay'),
+            '-Dbc.testing.logLevel' + project.property('logLevel')
     ]
 }
 

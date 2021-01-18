@@ -1,14 +1,29 @@
 package sprint_0;
 
 import battlecode.common.*;
+import utilities.Logger;
 
-import static sprint_0.Communications.*;
+import static utilities.Communications.*;
 
+/**
+ * <p><dt><strong>Communications:</strong></dt>
+ * <dd>The politician sets its flag to the radius
+ * it'll empower to, and tells nearby muckrakers
+ * to get out of that radius.</dd></p>
+ */
 //TODO: Account for converted politicians/slanderers
 public class Politician {
+	//remove begin
+	public static final boolean LOG = true;
+	public static final Logger initializationLogger
+			= new Logger(LOG ? 1 : 0, 3, 15000, "Politician initialization");
+	public static final Logger pathfindingLogger
+			= new Logger(LOG ? 25 : 0, 3, 15000, "Politician pathfinding");
+	//remove end
+	//how many times have I tried to empower
 	public static int tries = 0;
-	public static RobotController robotController;
 	public static MapLocation target;
+	public static RobotController robotController;
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
 	public static void initialize(RobotController robotController) throws GameActionException {
@@ -17,13 +32,14 @@ public class Politician {
 			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
 				int flag = robotController.getFlag(robotInfo.ID);
 				if(flag!=0) {
-					int prefix = decodePrefix(flag);
+					int prefix = flag/EnlightenmentCenter.EC_PREFIX_MUL;
 					if(robotInfo.getLocation().add(DIRECTIONS[prefix-1]).equals(robotController.getLocation())) {
 						target = decodeLocation(robotController.getLocation(), flag);
 					}
 				}
 			}
 		}
+		initializationLogger.logBytecode(Clock.getBytecodeNum());//remove line
 	}
 
 	public static void processRound() throws GameActionException {
@@ -49,7 +65,10 @@ public class Politician {
 				}
 			}
 		}
+		int roundBegin = robotController.getRoundNum();//remove line
+		int start = Clock.getBytecodeNum();//remove line
 		pathfind();
+		pathfindingLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
 
 	public static void pathfind() throws GameActionException {

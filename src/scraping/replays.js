@@ -11,8 +11,8 @@ for (const row of document.querySelectorAll("tbody > tr")) {
     const rank = cols[5].textContent;
     let linkedTime = time;
     if (cols[6].textContent != "N/A") {
-         const replay = cols[6].querySelector('a').href;
-         linkedTime = "EQUALSHYPERLINK(\"" + replay + "\"COMMA\"" + time + "\")";
+        const replay = cols[6].querySelector('a').href;
+        linkedTime = "EQUALSHYPERLINK(\"" + replay + "\"COMMA\"" + time + "\")";
     }
     const elems = [linkedTime, opp, score.length == 3 ? "Queued" : score, rank];
     out.push(elems.join());

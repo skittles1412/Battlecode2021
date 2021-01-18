@@ -32,6 +32,7 @@ public class Submit {
 	//run in folder containing src
 	private static final File ROOT = new File(System.getProperty("user.dir")), SOURCE = getChild(ROOT, "src");
 	private static final Pattern IMPORT = Pattern.compile("\\h*import\\h*(?:static\\h*)?([^;]+);");
+
 	static class ToProcessFile {
 		public File file;
 		public String path;
@@ -85,7 +86,7 @@ public class Submit {
 							throw new IllegalArgumentException("The import "+importedClass+" couldn't be found under src");
 						}
 					}else {
-						File imported = getChild(SOURCE, importPath+=".java");
+						File imported = getChild(SOURCE, importPath += ".java");
 						importPath = folder+"/external_imports/"+importPath;
 						if(!processedFiles.contains(importPath)) {
 							processedFiles.add(importPath);

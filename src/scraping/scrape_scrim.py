@@ -94,14 +94,16 @@ class MatchScraper:
             self.browser.find_element(By.XPATH, '//button[contains(@class, "modebutton")][text()="Queue"]').click()
             sleep(0.1)
 
-        teams = self.browser.find_element(By.CSS_SELECTOR, "span.red").text.strip(), self.browser.find_element(By.CSS_SELECTOR, "span.blue").text.strip()
+        teams = self.browser.find_element(By.CSS_SELECTOR, "span.red").text.strip(), self.browser.find_element(
+            By.CSS_SELECTOR, "span.blue").text.strip()
         opponent = teams[0] if teams[0] != "java :ghosthug:" else teams[1]
 
         maps = []
         durations = []
         winners = []
         for i in range(3):
-            info = self.browser.find_element(By.CSS_SELECTOR, f"div.gameWrapper > div:nth-of-type({i+1})").text  # 1-indexed
+            info = self.browser.find_element(By.CSS_SELECTOR,
+                                             f"div.gameWrapper > div:nth-of-type({i + 1})").text  # 1-indexed
             round_map = info.split('-')[0]
             duration = info.strip().split()[-2]
             maps.append(round_map.strip())
@@ -129,7 +131,7 @@ def main():
             maps, durations, winners = [["N/A"] * 3] * 3
         output.append(scrim)
         for i in range(3):
-            output.append(f"Round {i+1},{maps[i]},{durations[i]},{winners[i]}")
+            output.append(f"Round {i + 1},{maps[i]},{durations[i]},{winners[i]}")
         output.append('')
 
     browser.quit()

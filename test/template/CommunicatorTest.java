@@ -4,7 +4,7 @@ import battlecode.common.MapLocation;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static template.Communicator.*;
+import static utilities.Communications.*;
 
 class CommunicatiorTest {
 	@Test
@@ -15,7 +15,7 @@ class CommunicatiorTest {
 				for(int k = -63; k<=63; k++) {
 					for(int l = -63; l<=63; l++) {
 						int x = i+k, y = j+l;
-						assertEquals(new MapLocation(x, y), decodeLocation(i, j, encodeLocation(x, y)));
+						assertEquals(new MapLocation(x, y), decodeLocation(new MapLocation(i, j), encodeLocation(new MapLocation(x, y))));
 					}
 				}
 			}

@@ -71,11 +71,12 @@ public strictfp class RobotPlayer {
 	}
 
 	static void runEnlightenmentCenter() throws GameActionException {
-		RobotType toBuild = randomSpawnableRobotType();
+//		RobotType toBuild = randomSpawnableRobotType();
+		RobotType toBuild = RobotType.SLANDERER;
 		int influence = 50;
 		for(Direction dir: directions) {
 			if(rc.canBuildRobot(toBuild, dir, influence)) {
-				rc.buildRobot(toBuild, dir, influence);
+//				rc.buildRobot(toBuild, dir, influence);
 			}else {
 				break;
 			}

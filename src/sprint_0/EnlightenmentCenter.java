@@ -1,35 +1,91 @@
 package sprint_0;
 
 import battlecode.common.*;
+import utilities.Communications;
+import utilities.FastRandom;
+import utilities.IntHashMap;
+import utilities.Logger;
 
-import java.util.*;
+import static utilities.Communications.*;
 
-import static sprint_0.Communications.*;
-
+/**
+ * <p><dt><strong>Bidding:</strong></dt>
+ * <dd>Adaptive bidding. Increase bid by 2 on losses and decrease by 2 with 1/15 chance.
+ * Only bid when >= 350 influence. Otherwise there's a 50% chance of choosing to bid
+ * a random number from 1-3, and a 50% chance to not bid at all</dd></p>
+ * <p><dt><strong>Communications:</strong></dt>
+ * <dd>The EC sends information to units it has just spawned.
+ * The first four bits indicates the direction the unit which shall receive the command is.
+ * An extra bit is used in order to differentiate with 0.
+ * The last 20 bits describes the unit's command</dd></p>
+ */
 public class EnlightenmentCenter {
-	public static int vote = 2, lastVoteCount, lastVoteRound = -1, lastCleaned = 0, selfEmpowerID = 0, spawnInd = 0, nextFlag = 0;
-	public static int[] spawned;
+	//remove begin
+	public static final boolean LOG = true;
+	public static final Logger initializationLogger
+			= new Logger(LOG ? 1 : 0, 2, 20000, "EC initialization");
+	public static final Logger communicationLogger
+			= new Logger(LOG ? 25 : 0, 2, 20000, "EC communication");
+	public static final Logger buildLogger
+			= new Logger(LOG ? 25 : 0, 2, 20000, "EC building");
+	public static final Logger voteLogger
+			= new Logger(LOG ? 25 : 0, 2, 20000, "EC voting");
+	public static final Logger attackLogger
+			= new Logger(LOG ? 1 : 0, 2, 20000, "EC attacking");
+	//remove end
+	//to multiply by prefix
+	public static final int EC_PREFIX_MUL = 1048576;//1<<20
+	//did I vote last round?
 	public static boolean voted = false;
+	//next vote, last amount of votes on my team, last time I tried to vote
+	public static int vote = 2, lastVoteCount, lastVoteRound = -1;
+	//politician sent to self empower
+	public static int selfEmpowerID = 0;
+	//flag to set to next round
+	public static int nextFlag = 0;
+	//last time I tried to clean up spawned, the pointer of spawned (used as an arraylist)
+	public static int lastCleaned = 0, spawnInd = 0;
+	public static int[] spawned;
 	public static RobotController robotController;
-	public static HashMap<MapLocation, Integer> processedECs, toProcessECs;
+	//attacked neutral ECs, to attack neutral ECs
+	public static IntHashMap processedECs, toProcessECs;
+	public static int myLocationFlag;
 	public static MapLocation myLocation;
-	public static final Direction[] CARDINAL_DIRECTIONS = Direction.cardinalDirections();
-	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
+	//order to spawn robots
+	public static Direction[] cardinalDirections = Direction.cardinalDirections();
+	public static Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
+
 	public static void initialize(RobotController robotController) throws GameActionException {
 		EnlightenmentCenter.robotController = robotController;
 		spawned = new int[750];
+		myLocationFlag = encodeLocation(myLocation = robotController.getLocation());
+		processedECs = new IntHashMap(17);
+		toProcessECs = new IntHashMap(17);
+		//sort build directions
 		double[] val = new double[8];
-		myLocation = robotController.getLocation();
-		processedECs = new HashMap<>();
-		toProcessECs = new HashMap<>();
 		for(int i = 8; --i>=0; ) {
-			MapLocation newLocation = myLocation.add(DIRECTIONS[i]);
+			MapLocation newLocation = myLocation.add(directions[i]);
 			if(robotController.onTheMap(newLocation)) {
 				val[i] = robotController.sensePassability(newLocation);
 			}
 		}
-		Arrays.sort(DIRECTIONS, Comparator.comparingDouble(o -> val[o.ordinal()]));
-		Arrays.sort(CARDINAL_DIRECTIONS, Comparator.comparingDouble(o -> val[o.ordinal()]));
+		for(int i = 7; --i>=0; ) {
+			double cur = val[directions[i].ordinal()];
+			for(int j = i; j<7&&cur>val[directions[j+1].ordinal()]; j++) {
+				Direction tmp = directions[j];
+				directions[j] = directions[j+1];
+				directions[j+1] = tmp;
+			}
+		}
+		for(int i = 3; --i>=0; ) {
+			double cur = val[cardinalDirections[i].ordinal()];
+			for(int j = i; j<3&&cur>val[cardinalDirections[j+1].ordinal()]; j++) {
+				Direction tmp = cardinalDirections[j];
+				cardinalDirections[j] = cardinalDirections[j+1];
+				cardinalDirections[j+1] = tmp;
+			}
+		}
+		initializationLogger.logBytecode(Clock.getBytecodeNum());//remove line
 	}
 
 	public static void processRound() throws GameActionException {
@@ -37,79 +93,45 @@ public class EnlightenmentCenter {
 		nextFlag = 0;
 		vote();
 		//process comms
-		//TODO: bytecode optimize this currently takes 27k bytecode worst case
 		if(!robotController.isReady()) {
-			if(robotController.getRoundNum()-lastCleaned>=100) {//update spawned and remove nonexistent robots
-				int nSpawnInd = 0;
-				int[] newSpawned = new int[750];
-				for(int i = 0; i<spawnInd; i++) {
-					if(robotController.canGetFlag(spawned[i])) {
-						int flag = robotController.getFlag(newSpawned[nSpawnInd++] = spawned[i]);
-						int prefix = decodePrefix(flag);
-						if(prefix!=0) {
-							int influence = prefix-512;
-							if(influence<=300) {
-								MapLocation location = decodeLocation(myLocation, flag);
-								Integer assignee = processedECs.get(location);
-								if(assignee==null) {
-									toProcessECs.put(location, influence);
-								}else if(!robotController.canGetFlag(assignee)) {
-									processedECs.remove(location);
-									toProcessECs.put(location, influence);
-								}
-							}
-						}
-					}
-				}
-				spawned = newSpawned;
-				spawnInd = nSpawnInd;
+			int startRound = robotController.getRoundNum();//remove line
+			int start = Clock.getBytecodeNum();//remove line
+			if(robotController.getRoundNum()-lastCleaned>=100) {
+				cleanUpCommunications();
 				lastCleaned = robotController.getRoundNum();
 			}else {
-				for(int i = 0; i<spawnInd; i++) {
-					if(robotController.canGetFlag(spawned[i])) {
-						int flag = robotController.getFlag(spawned[i]);
-						int prefix = decodePrefix(flag);
-						if(prefix!=0) {
-							int influence = prefix-512;
-							if(influence<=300) {
-								MapLocation location = decodeLocation(myLocation, flag);
-								Integer assignee = processedECs.get(location);
-								if(assignee==null) {
-									toProcessECs.put(location, influence);
-								}else if(!robotController.canGetFlag(assignee)) {
-									processedECs.remove(location);
-									toProcessECs.put(location, influence);
-								}
-							}
-						}
-					}
-				}
+				processCommunications();
 			}
+			communicationLogger.logBytecode(startRound, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 		}
 		vote();
 		//process spawning
 		//TODO: Don't spawn in future self empowering places
 		if(robotController.isReady()) {
 			if(!attackEC()) {
+				int start = Clock.getBytecodeNum();//remove line
 				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()<=9e7&&
 						(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
 					Direction buildDirection;
-					if((buildDirection = build(CARDINAL_DIRECTIONS, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
+					if((buildDirection = build(cardinalDirections, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
 						selfEmpowerID = spawned[spawnInd-1];
-						nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(myLocation));
+						nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|myLocationFlag;
 					}
 				}else {
-					build(DIRECTIONS, RobotType.MUCKRAKER, 1);
+					build(directions, RobotType.MUCKRAKER, 1);
 				}
+				buildLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 			}
 		}
 	}
 
 	/**
-	 * returns the direction of the robot built or null if none were built
+	 * Builds a robot with the specified type and influence using one of the
+	 * supplied directions. The directions are processed in reverse order
+	 *
+	 * @return the direction of the robot built or null if none were built
 	 */
 	private static Direction build(Direction[] directions, RobotType type, int influence) throws GameActionException {
-		//assume influence <= myInfluence and cooldown < 1
 		for(int i = directions.length; --i>=0; ) {
 			Direction direction = directions[i];
 			if(robotController.canBuildRobot(type, direction, influence)) {
@@ -123,6 +145,7 @@ public class EnlightenmentCenter {
 
 	private static void vote() throws GameActionException {
 		if(robotController.getRoundNum()!=lastVoteRound) {
+			int start = 0;//remove line
 			if(voted&&robotController.getTeamVotes()==lastVoteCount) {
 				vote += 2;
 			}
@@ -137,38 +160,95 @@ public class EnlightenmentCenter {
 					voted = true;
 					lastVoteCount = robotController.getTeamVotes();
 					robotController.bid(vote);
-				}else if(robotController.getInfluence()>=100) {
-					robotController.bid(1);
+				}else if(robotController.getInfluence()>=100&&FastRandom.nextInt(2)==0) {
+					robotController.bid(FastRandom.nextInt(3)+1);
 				}
 			}
 			lastVoteRound = robotController.getRoundNum();
+			voteLogger.logBytecode(Clock.getBytecodeNum()-start);//remove line
 		}
 	}
 
 	/**
-	 * Returns true if a politician was built to attack an EC
+	 * Builds a politician to attack the neutral EC found so far
+	 * with the lowest influence. Will only attack if it leaves
+	 * this EC with 100 influence
+	 *
+	 * @return true if a politician was built to attack an EC
 	 */
 	private static boolean attackEC() throws GameActionException {
 		if(!toProcessECs.isEmpty()) {
-			MapLocation location = null;
+			int start = Clock.getBytecodeNum();//remove line
+			int location = 0;
 			int influence = Integer.MAX_VALUE;
-			for(Map.Entry<MapLocation, Integer> target: toProcessECs.entrySet()) {
-				if(target.getValue()<influence) {
-					location = target.getKey();
-					influence = target.getValue();
+			for(IntHashMap.Entry target: toProcessECs) {
+				if(target.value<influence) {
+					location = target.key;
+					influence = target.value;
 				}
 			}
 			int spawn = influence+11;
 			if(robotController.getInfluence()-spawn>=100) {
 				Direction buildDirection;
-				if((buildDirection = build(DIRECTIONS, RobotType.POLITICIAN, spawn))!=null) {
-					nextFlag = encodePrefix(buildDirection.ordinal()+1, encodeLocation(location));
+				if((buildDirection = build(directions, RobotType.POLITICIAN, spawn))!=null) {
+					nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|location;
 					toProcessECs.remove(location);
 					processedECs.put(location, spawned[spawnInd-1]);
 					return true;
 				}
 			}
+			attackLogger.logBytecode(Clock.getBytecodeNum()-start);//remove line
 		}
 		return false;
+	}
+
+	/**
+	 * Processes communications, adding new ECs if necessary
+	 */
+	private static void processCommunications() throws GameActionException {
+		for(int i = 0; i<spawnInd; i++) {
+			if(robotController.canGetFlag(spawned[i])) {
+				int flag = robotController.getFlag(spawned[i]);
+				if(flag!=0) {
+					int influence = decodePrefix(flag);
+					flag %= Communications.PREFIX_MUL;
+					int assignee = processedECs.get(flag);
+					if(assignee==0) {
+						toProcessECs.put(flag, influence);
+					}else if(!robotController.canGetFlag(assignee)) {
+						processedECs.remove(flag);
+						toProcessECs.put(flag, influence);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Processes communications and deletes robots that no longer exist
+	 *
+	 * @see #processCommunications()
+	 */
+	private static void cleanUpCommunications() throws GameActionException {
+		int nSpawnInd = 0;
+		int[] newSpawned = new int[750];
+		for(int i = 0; i<spawnInd; i++) {
+			if(robotController.canGetFlag(spawned[i])) {
+				int flag = robotController.getFlag(newSpawned[nSpawnInd++] = spawned[i]);
+				if(flag!=0) {
+					int influence = decodePrefix(flag);
+					flag %= Communications.PREFIX_MUL;
+					int assignee = processedECs.get(flag);
+					if(assignee==0) {
+						toProcessECs.put(flag, influence);
+					}else if(!robotController.canGetFlag(assignee)) {
+						processedECs.remove(flag);
+						toProcessECs.put(flag, influence);
+					}
+				}
+			}
+		}
+		spawned = newSpawned;
+		spawnInd = nSpawnInd;
 	}
 }

@@ -1,4 +1,4 @@
-package sprint_0;
+package utilities;
 
 // https://stackoverflow.com/questions/1640258/need-a-fast-random-generator-for-c
 public class FastRandom {
