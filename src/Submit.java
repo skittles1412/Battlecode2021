@@ -9,6 +9,20 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * Extracts the specified folder (either through program argument
+ * or user input, if none is provided) into submission.zip.
+ * The program should be run in the directory containing src.
+ * All imports should either be from battlecode, java, or from
+ * a file which is under src. These imports will then get added under
+ * /external_imports. You can also specify lines to comment
+ * out when submitting. Lines starting with System.out.print and lines
+ * ending in remove line will get commented out. In addition, you
+ * can specify a range to comment out. Lines ending in remove begin
+ * indicates the start of the range to remove. Lines ending in remove
+ * end indicates the end of the range. Both remove begin and remove
+ * end will get commented out.
+ */
 public class Submit {
 	private static BufferedWriter writer;
 	private static String folder;
@@ -18,7 +32,6 @@ public class Submit {
 	//run in folder containing src
 	private static final File ROOT = new File(System.getProperty("user.dir")), SOURCE = getChild(ROOT, "src");
 	private static final Pattern IMPORT = Pattern.compile("\\h*import\\h*(?:static\\h*)?([^;]+);");
-	private static final Pattern PRINT = Pattern.compile("\\h*System\\.out\\.println");
 	static class ToProcessFile {
 		public File file;
 		public String path;
@@ -47,6 +60,7 @@ public class Submit {
 	//write logic to process a file here
 	//the new file should get written to writer
 	private static void processFile(File file) throws IOException {
+		boolean comment = false;
 		for(String line: Files.readAllLines(file.toPath())) {
 			Matcher matcher = IMPORT.matcher(line);
 			if(matcher.find()) {
@@ -79,8 +93,17 @@ public class Submit {
 						}
 					}
 				}
-			}else if(PRINT.matcher(line).find()) {
-				line = "//"+line;
+			}else {
+				String toCheck = line.trim().toLowerCase();
+				if(toCheck.endsWith("remove begin")) {
+					comment = true;
+				}
+				if(comment||toCheck.startsWith("system.out.print")||toCheck.endsWith("remove line")) {
+					line = "//"+line;
+				}
+				if(toCheck.endsWith("remove end")) {
+					comment = false;
+				}
 			}
 			println(line);
 		}
