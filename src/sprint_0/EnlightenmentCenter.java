@@ -43,6 +43,8 @@ public class EnlightenmentCenter {
 	public static int selfEmpowerID = 0;
 	//flag to set to next round
 	public static int nextFlag = 0;
+	//minimum amount of influence that I should have
+	public static int minInfluence = 0;
 	//last time I tried to clean up spawned, the pointer of spawned (used as an arraylist)
 	public static int lastCleaned = 0, spawnInd = 0;
 	public static int[] spawned;
@@ -94,7 +96,18 @@ public class EnlightenmentCenter {
 		vote();
 		//process comms
 		if(!robotController.isReady()) {
-			int startRound = robotController.getRoundNum();//remove line
+			int round = robotController.getRoundNum();
+			if(round<50) {
+				minInfluence = 10;
+			}else if(round<100) {
+				minInfluence = 30;
+			}else if(round<200) {
+				minInfluence = 50;
+			}else if(round<300) {
+				minInfluence = 70;
+			}else {
+				minInfluence = 100;
+			}
 			int start = Clock.getBytecodeNum();//remove line
 			if(robotController.getRoundNum()-lastCleaned>=100) {
 				cleanUpCommunications();
@@ -102,7 +115,7 @@ public class EnlightenmentCenter {
 			}else {
 				processCommunications();
 			}
-			communicationLogger.logBytecode(startRound, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
+			communicationLogger.logBytecode(round, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 		}
 		vote();
 		//process spawning
@@ -110,7 +123,7 @@ public class EnlightenmentCenter {
 		if(robotController.isReady()) {
 			if(!attackEC()) {
 				int start = Clock.getBytecodeNum();//remove line
-				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()<=9e7&&
+				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()>=minInfluence&&robotController.getInfluence()<=9e7&&
 						(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
 					Direction buildDirection;
 					if((buildDirection = build(cardinalDirections, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
@@ -118,7 +131,7 @@ public class EnlightenmentCenter {
 						nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|myLocationFlag;
 					}
 				}else {
-					build(directions, RobotType.MUCKRAKER, 1);
+					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
 				}
 				buildLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 			}
@@ -155,12 +168,12 @@ public class EnlightenmentCenter {
 			vote = Math.max(vote, robotController.getInfluence()/75000);
 			voted = false;
 			if(robotController.getTeamVotes()<=750) {
-				if(robotController.getInfluence()>=Math.max(350, vote)
+				if(robotController.getInfluence()>=Math.max(300, vote)
 					/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 					voted = true;
 					lastVoteCount = robotController.getTeamVotes();
 					robotController.bid(vote);
-				}else if(robotController.getInfluence()>=100&&FastRandom.nextInt(2)==0) {
+				}else if(robotController.getInfluence()>=minInfluence&&FastRandom.nextInt(2)==0) {
 					robotController.bid(FastRandom.nextInt(3)+1);
 				}
 			}
@@ -188,7 +201,7 @@ public class EnlightenmentCenter {
 				}
 			}
 			int spawn = influence+11;
-			if(robotController.getInfluence()-spawn>=100) {
+			if(robotController.getInfluence()-spawn>=minInfluence) {
 				Direction buildDirection;
 				if((buildDirection = build(directions, RobotType.POLITICIAN, spawn))!=null) {
 					nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|location;
