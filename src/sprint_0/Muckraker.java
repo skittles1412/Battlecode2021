@@ -122,7 +122,7 @@ public class Muckraker {
 		}
 		pathfindEnemyLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 
-		roundBegin = robotController.getRoundNum();
+		roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
 		//repel from our ECs (for the sake of spawning) and muckrakers
 		//get out of empower radius of politicians

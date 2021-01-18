@@ -31,7 +31,9 @@ public class Submit {
 	//working directory
 	//run in folder containing src
 	private static final File ROOT = new File(System.getProperty("user.dir")), SOURCE = getChild(ROOT, "src");
+	private static final Pattern PACKAGE = Pattern.compile("\\h*package\\h*[^;]+;");
 	private static final Pattern IMPORT = Pattern.compile("\\h*import\\h*(?:static\\h*)?([^;]+);");
+	private static final Pattern IMPORT_STATIC = Pattern.compile("\\h*import\\h*static\\h*([^;]+);");
 
 	static class ToProcessFile {
 		public File file;
@@ -63,47 +65,61 @@ public class Submit {
 	private static void processFile(File file) throws IOException {
 		boolean comment = false;
 		for(String line: Files.readAllLines(file.toPath())) {
-			Matcher matcher = IMPORT.matcher(line);
-			if(matcher.find()) {
-				String importedClass = matcher.group(1);
-				if(!importedClass.startsWith("battlecode")&&!importedClass.startsWith("java")&&!importedClass.startsWith(folder)) {
-					line = line.substring(0, matcher.start(1))+folder+".external_imports."+importedClass+line.substring(matcher.end(1));
-					String importPath = importedClass.replace('.', '/');
-					if(importPath.endsWith("/*")) {
-						importPath = importPath.substring(0, importPath.length()-1);
-						File imported = getChild(SOURCE, importPath);
-						if(imported.exists()) {
-							for(File child: imported.listFiles()) {
-								if(child.isFile()) {
-									String path = folder+"/external_imports/"+importPath+child.getName();
-									if(!processedFiles.contains(path)) {
-										processedFiles.add(path);
-										toProcessFiles.add(new ToProcessFile(child, path));
+			if(PACKAGE.matcher(line).find()) {
+				line = "package "+folder+";";
+			}else {
+				Matcher matcher = IMPORT.matcher(line);
+				if(matcher.find()) {
+					String importedClass = matcher.group(1);
+					if(!importedClass.startsWith("battlecode")&&!importedClass.startsWith("java")&&!importedClass.startsWith(folder)) {
+						String importPath = importedClass.replace('.', '/');
+						if(IMPORT_STATIC.matcher(line).find()) {
+							String[] imports = importedClass.split("\\.");
+							String newImport = imports[imports.length-1];
+							if(importPath.endsWith("/*")) {
+								importPath = importPath.substring(0, importPath.length()-2);
+								newImport = imports[imports.length-2]+"."+newImport;
+							}
+							line = line.substring(0, matcher.start(1))+folder+"."+newImport+line.substring(matcher.end(1));
+						}else {
+							line = line.substring(0, matcher.start(1))+folder+".*"+line.substring(matcher.end(1));
+						}
+						if(importPath.endsWith("/*")) {
+							importPath = importPath.substring(0, importPath.length()-2);
+							File imported = getChild(SOURCE, importPath);
+							if(imported.exists()) {
+								for(File child: imported.listFiles()) {
+									if(child.isFile()) {
+										String path = folder+"/"+child.getName();
+										if(!processedFiles.contains(path)) {
+											processedFiles.add(path);
+											toProcessFiles.add(new ToProcessFile(child, path));
+										}
 									}
 								}
+							}else {
+								throw new IllegalArgumentException("The import "+importedClass+" couldn't be found under src");
 							}
 						}else {
-							throw new IllegalArgumentException("The import "+importedClass+" couldn't be found under src");
-						}
-					}else {
-						File imported = getChild(SOURCE, importPath += ".java");
-						importPath = folder+"/external_imports/"+importPath;
-						if(!processedFiles.contains(importPath)) {
-							processedFiles.add(importPath);
-							toProcessFiles.add(new ToProcessFile(imported, importPath));
+							File imported = getChild(SOURCE, importPath += ".java");
+							importPath = folder+"/"+imported.getName();
+							if(!processedFiles.contains(importPath)) {
+								processedFiles.add(importPath);
+								toProcessFiles.add(new ToProcessFile(imported, importPath));
+							}
 						}
 					}
-				}
-			}else {
-				String toCheck = line.trim().toLowerCase();
-				if(toCheck.endsWith("remove begin")) {
-					comment = true;
-				}
-				if(comment||toCheck.startsWith("system.out.print")||toCheck.endsWith("remove line")) {
-					line = "//"+line;
-				}
-				if(toCheck.endsWith("remove end")) {
-					comment = false;
+				}else {
+					String toCheck = line.trim().toLowerCase();
+					if(toCheck.endsWith("remove begin")) {
+						comment = true;
+					}
+					if(comment||toCheck.startsWith("system.out.print")||toCheck.endsWith("remove line")) {
+						line = "//"+line;
+					}
+					if(toCheck.endsWith("remove end")) {
+						comment = false;
+					}
 				}
 			}
 			println(line);

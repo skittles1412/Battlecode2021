@@ -2,8 +2,6 @@ package sprint_0;
 
 import battlecode.common.*;
 
-import java.util.*;
-
 public class RobotPlayer {
 	public static void run(RobotController robotController) throws GameActionException {
 		switch(robotController.getType()) {
