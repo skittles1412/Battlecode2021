@@ -54,6 +54,7 @@ public class Logger {
 	public void logBytecode(int bytecodeBegin, int bytecodeEnd, String message) {
 		logBytecode((bytecodeEnd+bytecodeLimit-bytecodeBegin)%bytecodeLimit, message);
 	}
+
 	public void logBytecode(int roundBegin, int roundEnd, int bytecodeBegin, int bytecodeEnd) {
 		logBytecode(roundBegin, roundEnd, bytecodeBegin, bytecodeEnd, defaultMessage);
 	}

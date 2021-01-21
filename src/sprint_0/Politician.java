@@ -1,6 +1,7 @@
 package sprint_0;
 
 import battlecode.common.*;
+import utilities.IntHashMap;
 import utilities.Logger;
 
 import static utilities.Communications.*;
@@ -22,11 +23,14 @@ public class Politician {
 	//remove end
 	//how many times have I tried to empower
 	public static int tries = 0;
+	//how many times have I visited this tile
+	public static double[] visited;
 	public static MapLocation target;
 	public static RobotController robotController;
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
 	public static void initialize(RobotController robotController) throws GameActionException {
+		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;
 		for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
 			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
@@ -39,7 +43,8 @@ public class Politician {
 				}
 			}
 		}
-		initializationLogger.logBytecode(Clock.getBytecodeNum());//remove line
+		visited = new double[16384];
+		initializationLogger.logBytecode(roundBegin, robotController.getRoundNum(), 0, Clock.getBytecodeNum());//remove line
 	}
 
 	public static void processRound() throws GameActionException {
@@ -93,6 +98,17 @@ public class Politician {
 		double cost6 = robotController.canMove(Direction.WEST) ? robotController.sensePassability(location6) : 1e10;
 		double cost7 = robotController.canMove(Direction.NORTHWEST) ? robotController.sensePassability(location7) : 1e10;
 		double cost8 = robotController.sensePassability(location8);
+		int encoded8 = encodeLocation(location8);
+		cost0 += visited[encodeLocation(location0)];
+		cost1 += visited[encodeLocation(location1)];
+		cost2 += visited[encodeLocation(location2)];
+		cost3 += visited[encodeLocation(location3)];
+		cost4 += visited[encodeLocation(location4)];
+		cost5 += visited[encodeLocation(location5)];
+		cost6 += visited[encodeLocation(location6)];
+		cost7 += visited[encodeLocation(location7)];
+		cost8 += visited[encoded8];
+		visited[encoded8] = Math.pow(Math.sqrt(visited[encoded8]*3)+1, 2)/3;
 		int dist0 = target.distanceSquaredTo(location0);
 		int dist1 = target.distanceSquaredTo(location1);
 		int dist2 = target.distanceSquaredTo(location2);
