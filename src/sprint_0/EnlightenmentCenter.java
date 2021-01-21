@@ -224,13 +224,15 @@ public class EnlightenmentCenter {
 				int flag = robotController.getFlag(spawned[i]);
 				if(flag!=0) {
 					int influence = decodePrefix(flag);
-					flag %= Communications.PREFIX_MUL;
-					int assignee = processedECs.get(flag);
-					if(assignee==0) {
-						toProcessECs.put(flag, influence);
-					}else if(!robotController.canGetFlag(assignee)) {
-						processedECs.remove(flag);
-						toProcessECs.put(flag, influence);
+					if(influence>=50) {
+						flag %= Communications.PREFIX_MUL;
+						int assignee = processedECs.get(flag);
+						if(assignee==0) {
+							toProcessECs.put(flag, influence);
+						}else if(!robotController.canGetFlag(assignee)) {
+							processedECs.remove(flag);
+							toProcessECs.put(flag, influence);
+						}
 					}
 				}
 			}
@@ -250,13 +252,15 @@ public class EnlightenmentCenter {
 				int flag = robotController.getFlag(newSpawned[nSpawnInd++] = spawned[i]);
 				if(flag!=0) {
 					int influence = decodePrefix(flag);
-					flag %= Communications.PREFIX_MUL;
-					int assignee = processedECs.get(flag);
-					if(assignee==0) {
-						toProcessECs.put(flag, influence);
-					}else if(!robotController.canGetFlag(assignee)) {
-						processedECs.remove(flag);
-						toProcessECs.put(flag, influence);
+					if(influence>=50) {
+						flag %= Communications.PREFIX_MUL;
+						int assignee = processedECs.get(flag);
+						if(assignee==0) {
+							toProcessECs.put(flag, influence);
+						}else if(!robotController.canGetFlag(assignee)) {
+							processedECs.remove(flag);
+							toProcessECs.put(flag, influence);
+						}
 					}
 				}
 			}
