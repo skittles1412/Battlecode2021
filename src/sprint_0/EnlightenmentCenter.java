@@ -120,6 +120,8 @@ public class EnlightenmentCenter {
 		vote();
 		//process spawning
 		//TODO: Don't spawn in future self empowering places
+		//TODO: Anti EC surrounding
+		//TODO: Protect with muckrakers
 		if(robotController.isReady()) {
 			if(!attackEC()) {
 				int start = Clock.getBytecodeNum();//remove line
@@ -190,6 +192,7 @@ public class EnlightenmentCenter {
 	 * @return true if a politician was built to attack an EC
 	 */
 	private static boolean attackEC() throws GameActionException {
+		//TODO: save up for attacking neutral EC
 		if(!toProcessECs.isEmpty()) {
 			int start = Clock.getBytecodeNum();//remove line
 			int location = 0;

@@ -1,7 +1,6 @@
 package sprint_0;
 
 import battlecode.common.*;
-import utilities.IntHashMap;
 import utilities.Logger;
 
 import static utilities.Communications.*;

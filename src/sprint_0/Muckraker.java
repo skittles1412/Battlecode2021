@@ -32,6 +32,7 @@ public class Muckraker {
 	}
 
 	public static void processRound() throws GameActionException {
+		//TODO: surround enemy politicians
 		int start = Clock.getBytecodeNum();//remove line
 		processNeutralECs();
 		flagLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
