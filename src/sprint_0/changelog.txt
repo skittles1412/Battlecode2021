@@ -1,3 +1,9 @@
+4:
+Fix 0 influence neutral EC bug
+Create a minimum influence before voting
+Spawn politicians to prevent EC from getting surrounded
+Improve politician pathfinding by adding a cost to visited tiles
+
 3:
 EC now has min influence, which decides the amount of influence it must have before bidding or attacking a neutral EC.
 Politician only sets flag when countdown < 4
