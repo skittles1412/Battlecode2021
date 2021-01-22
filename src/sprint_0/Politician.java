@@ -11,7 +11,6 @@ import static utilities.Communications.*;
  * it'll empower to, and tells nearby muckrakers
  * to get out of that radius.</dd></p>
  */
-//TODO: Account for converted politicians/slanderers
 public class Politician {
 	//remove begin
 	public static final boolean LOG = true;
@@ -24,6 +23,7 @@ public class Politician {
 	public static int tries = 0;
 	//how many times have I visited this tile
 	public static double[] visited;
+	public static boolean antiSurround;
 	public static MapLocation target;
 	public static RobotController robotController;
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
@@ -31,22 +31,36 @@ public class Politician {
 	public static void initialize(RobotController robotController) throws GameActionException {
 		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;
-		for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
-			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
-				int flag = robotController.getFlag(robotInfo.ID);
-				if(flag!=0) {
-					int prefix = flag/EnlightenmentCenter.EC_PREFIX_MUL;
-					if(robotInfo.getLocation().add(DIRECTIONS[prefix-1]).equals(robotController.getLocation())) {
-						target = decodeLocation(robotController.getLocation(), flag);
+		//find EC that spawned me
+		loop:
+		{
+			for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
+				if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
+					int flag = robotController.getFlag(robotInfo.ID);
+					if(flag!=0) {
+						int prefix = flag/EnlightenmentCenter.EC_PREFIX_MUL;
+						if(robotInfo.getLocation().add(DIRECTIONS[prefix-1]).equals(robotController.getLocation())) {
+							if(flag%EnlightenmentCenter.EC_PREFIX_MUL==EnlightenmentCenter.ANTI_SURROUND_PREFIX) {
+								antiSurround = true;
+							}else {
+								target = decodeLocation(robotController.getLocation(), flag);
+							}
+							break loop;
+						}
 					}
 				}
 			}
+			antiSurround = true;
 		}
 		visited = new double[16384];
 		initializationLogger.logBytecode(roundBegin, robotController.getRoundNum(), 0, Clock.getBytecodeNum());//remove line
 	}
 
 	public static void processRound() throws GameActionException {
+		if(antiSurround) {
+			processSurround();
+			return;
+		}
 		//calculate flags
 		int dist = robotController.getLocation().distanceSquaredTo(target);
 		if(dist<=9&&robotController.getCooldownTurns()<4) {
@@ -77,7 +91,20 @@ public class Politician {
 		pathfindingLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
 
-	public static void pathfind() throws GameActionException {
+	private static void processSurround() throws GameActionException {
+		if(!robotController.isReady()) {
+			return;
+		}
+		//TODO: maybe account for non 1 influence mucks
+		for(int i = 1; i<=9; i++) {
+			if((robotController.getConviction()-10)/Math.max(1, robotController.senseNearbyRobots(i).length)<2) {
+				robotController.empower(i-1);
+			}
+		}
+		robotController.empower(9);
+	}
+
+	private static void pathfind() throws GameActionException {
 		//TODO: maybe improve pathfinding; add bug nav?
 		MapLocation location0 = robotController.adjacentLocation(Direction.NORTH);
 		MapLocation location1 = robotController.adjacentLocation(Direction.NORTHEAST);

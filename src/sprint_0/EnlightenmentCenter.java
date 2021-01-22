@@ -35,10 +35,12 @@ public class EnlightenmentCenter {
 	//remove end
 	//to multiply by prefix
 	public static final int EC_PREFIX_MUL = 1048576;//1<<20
+	//anti surround flag indicator
+	public static final int ANTI_SURROUND_PREFIX = 524288;//1<<19
 	//did I vote last round?
 	public static boolean voted = false;
-	//next vote, last amount of votes on my team, last time I tried to vote
-	public static int vote = 2, lastVoteCount, lastVoteRound = -1;
+	//next vote, last amount of votes on my team, last time I tried to vote, how much influence should I have before voting
+	public static int vote = 2, lastVoteCount, lastVoteRound = -1, minVoteInfluence = 600;
 	//politician sent to self empower
 	public static int selfEmpowerID = 0;
 	//flag to set to next round
@@ -47,6 +49,8 @@ public class EnlightenmentCenter {
 	public static int minInfluence = 0;
 	//last time I tried to clean up spawned, the pointer of spawned (used as an arraylist)
 	public static int lastCleaned = 0, spawnInd = 0;
+	//rounds since I last attacked surrounding troops
+	public static int lastAntiSurround = 6;
 	public static int[] spawned;
 	public static RobotController robotController;
 	//attacked neutral ECs, to attack neutral ECs
@@ -108,6 +112,9 @@ public class EnlightenmentCenter {
 			}else {
 				minInfluence = 100;
 			}
+			if(round>=1430) {
+				minVoteInfluence = 100;
+			}
 			int start = Clock.getBytecodeNum();//remove line
 			if(robotController.getRoundNum()-lastCleaned>=100) {
 				cleanUpCommunications();
@@ -120,10 +127,9 @@ public class EnlightenmentCenter {
 		vote();
 		//process spawning
 		//TODO: Don't spawn in future self empowering places
-		//TODO: Anti EC surrounding
 		//TODO: Protect with muckrakers
 		if(robotController.isReady()) {
-			if(!attackEC()) {
+			if(!attackEC()&&!antiSurround()) {
 				int start = Clock.getBytecodeNum();//remove line
 				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()>=minInfluence&&robotController.getInfluence()<=9e7&&
 						(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
@@ -170,7 +176,7 @@ public class EnlightenmentCenter {
 			vote = Math.max(vote, robotController.getInfluence()/75000);
 			voted = false;
 			if(robotController.getTeamVotes()<=750) {
-				if(robotController.getInfluence()>=Math.max(300, vote)
+				if(robotController.getInfluence()>=Math.max(minVoteInfluence, vote)
 					/*&&FastRandom.nextInt(1500-robotController.getRoundNum())<(750-robotController.getTeamVotes())/0.7*/) {
 					voted = true;
 					lastVoteCount = robotController.getTeamVotes();
@@ -192,7 +198,6 @@ public class EnlightenmentCenter {
 	 * @return true if a politician was built to attack an EC
 	 */
 	private static boolean attackEC() throws GameActionException {
-		//TODO: save up for attacking neutral EC
 		if(!toProcessECs.isEmpty()) {
 			int start = Clock.getBytecodeNum();//remove line
 			int location = 0;
@@ -214,6 +219,28 @@ public class EnlightenmentCenter {
 				}
 			}
 			attackLogger.logBytecode(Clock.getBytecodeNum()-start);//remove line
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if this EC should spawn a politician in order to avoid
+	 * getting surrounded
+	 *
+	 * @return true if a politician was build to attack surrounding units
+	 */
+	private static boolean antiSurround() throws GameActionException {
+		if(++lastAntiSurround>=6&&robotController.senseNearbyRobots(5, robotController.getTeam().opponent()).length>=4) {
+			int maxUse = robotController.getInfluence()-minInfluence;
+			if(18<=maxUse) {
+				int influence = Math.min(maxUse, robotController.senseNearbyRobots(9).length*2+10);
+				Direction buildDirection;
+				if((buildDirection = build(directions, RobotType.POLITICIAN, influence))!=null) {
+					nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|ANTI_SURROUND_PREFIX;
+					lastAntiSurround = 0;
+					return true;
+				}
+			}
 		}
 		return false;
 	}
