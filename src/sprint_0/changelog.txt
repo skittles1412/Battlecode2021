@@ -1,3 +1,6 @@
+5:
+Remove self empower
+
 4:
 Fix 0 influence neutral EC bug
 Create a minimum influence before voting
