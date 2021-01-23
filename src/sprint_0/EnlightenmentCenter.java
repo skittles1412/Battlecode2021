@@ -131,16 +131,17 @@ public class EnlightenmentCenter {
 		if(robotController.isReady()) {
 			if(!attackEC()&&!antiSurround()) {
 				int start = Clock.getBytecodeNum();//remove line
-				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()>=minInfluence&&robotController.getInfluence()<=9e7&&
-						(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
-					Direction buildDirection;
-					if((buildDirection = build(cardinalDirections, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
-						selfEmpowerID = spawned[spawnInd-1];
-						nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|myLocationFlag;
-					}
-				}else {
-					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
-				}
+//				if(!robotController.canGetFlag(selfEmpowerID)&&robotController.getInfluence()>=minInfluence&&robotController.getInfluence()<=9e7&&
+//						(robotController.getInfluence()/2-10)*(robotController.getEmpowerFactor(robotController.getTeam(), 11)-1)>=25) {//self empower
+//					Direction buildDirection;
+//					if((buildDirection = build(cardinalDirections, RobotType.POLITICIAN, robotController.getInfluence()/2))!=null) {
+//						selfEmpowerID = spawned[spawnInd-1];
+//						nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|myLocationFlag;
+//					}
+//				}else {
+//					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
+//				}
+				build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
 				buildLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 			}
 		}
