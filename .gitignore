@@ -6,6 +6,7 @@ credentials.txt
 
 dist/*
 build/*
+out/*
 src/lectureplayer
 
 /matches
