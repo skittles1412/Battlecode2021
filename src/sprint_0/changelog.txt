@@ -1,3 +1,7 @@
+6:
+Spawn slanderers in first 150 rounds
+Encourage muckrakers to get farther away from its spawning EC
+
 5:
 Remove self empower
 
