@@ -129,30 +129,30 @@ public class Muckraker {
 			MapLocation mapLocation = robotInfo.location;
 			switch(robotInfo.type) {
 				case ENLIGHTENMENT_CENTER:
-					cost0 += 25*mapLocation.distanceSquaredTo(location0);
-					cost1 += 25*mapLocation.distanceSquaredTo(location1);
-					cost2 += 25*mapLocation.distanceSquaredTo(location2);
-					cost3 += 25*mapLocation.distanceSquaredTo(location3);
-					cost4 += 25*mapLocation.distanceSquaredTo(location4);
-					cost5 += 25*mapLocation.distanceSquaredTo(location5);
-					cost6 += 25*mapLocation.distanceSquaredTo(location6);
-					cost7 += 25*mapLocation.distanceSquaredTo(location7);
-					cost8 += 25*mapLocation.distanceSquaredTo(location8);
+					cost0 += 40*mapLocation.distanceSquaredTo(location0);
+					cost1 += 40*mapLocation.distanceSquaredTo(location1);
+					cost2 += 40*mapLocation.distanceSquaredTo(location2);
+					cost3 += 40*mapLocation.distanceSquaredTo(location3);
+					cost4 += 40*mapLocation.distanceSquaredTo(location4);
+					cost5 += 40*mapLocation.distanceSquaredTo(location5);
+					cost6 += 40*mapLocation.distanceSquaredTo(location6);
+					cost7 += 40*mapLocation.distanceSquaredTo(location7);
+					cost8 += 40*mapLocation.distanceSquaredTo(location8);
 					break;
 				case SLANDERER:
 					if(location8.distanceSquaredTo(mapLocation)<=12&&robotInfo.influence>influence) {
 						id = robotInfo.ID;
 						influence = robotInfo.influence;
 					}
-					cost0 += 60*mapLocation.distanceSquaredTo(location0);
-					cost1 += 60*mapLocation.distanceSquaredTo(location1);
-					cost2 += 60*mapLocation.distanceSquaredTo(location2);
-					cost3 += 60*mapLocation.distanceSquaredTo(location3);
-					cost4 += 60*mapLocation.distanceSquaredTo(location4);
-					cost5 += 60*mapLocation.distanceSquaredTo(location5);
-					cost6 += 60*mapLocation.distanceSquaredTo(location6);
-					cost7 += 60*mapLocation.distanceSquaredTo(location7);
-					cost8 += 60*mapLocation.distanceSquaredTo(location8);
+					cost0 += 200*mapLocation.distanceSquaredTo(location0);
+					cost1 += 200*mapLocation.distanceSquaredTo(location1);
+					cost2 += 200*mapLocation.distanceSquaredTo(location2);
+					cost3 += 200*mapLocation.distanceSquaredTo(location3);
+					cost4 += 200*mapLocation.distanceSquaredTo(location4);
+					cost5 += 200*mapLocation.distanceSquaredTo(location5);
+					cost6 += 200*mapLocation.distanceSquaredTo(location6);
+					cost7 += 200*mapLocation.distanceSquaredTo(location7);
+					cost8 += 200*mapLocation.distanceSquaredTo(location8);
 			}
 		}
 		if(id!=0) {
@@ -211,15 +211,15 @@ public class Muckraker {
 					int flag = robotController.getFlag(robotInfo.ID);
 					if(flag!=0) {
 						flag++;
-						cost0 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
-						cost1 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
-						cost2 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
-						cost3 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location3));
-						cost4 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location4));
-						cost5 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location5));
-						cost6 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location6));
-						cost7 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location7));
-						cost8 += 1000*Math.max(0, flag-mapLocation.distanceSquaredTo(location8));
+						cost0 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location0));
+						cost1 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location1));
+						cost2 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location2));
+						cost3 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location3));
+						cost4 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location4));
+						cost5 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location5));
+						cost6 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location6));
+						cost7 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location7));
+						cost8 += 100000*Math.max(0, flag-mapLocation.distanceSquaredTo(location8));
 					}
 				}
 			}
