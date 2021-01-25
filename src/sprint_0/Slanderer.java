@@ -94,9 +94,12 @@ public class Slanderer {
 			}
 			for(int i = -4; i<=4; i++) {
 				for(int j = -4; j<=4; j++) {
-					if((i+j)%2==0) {
+					if((i+j)%2==1) {
 						MapLocation newLocation = location8.translate(i, j);
-						if(robotController.canSenseLocation(newLocation)&&robotController.senseRobotAtLocation(newLocation)==null
+						RobotInfo robotInfo;
+						if(target.distanceSquaredTo(newLocation)>2&&robotController.canSenseLocation(newLocation)
+								&&((robotInfo=robotController.senseRobotAtLocation(newLocation))==null
+								||(robotInfo.type!=RobotType.POLITICIAN&&robotInfo.type!=RobotType.ENLIGHTENMENT_CENTER))
 								&&location8.distanceSquaredTo(newLocation)<location8.distanceSquaredTo(foundLocation)) {
 							foundLocation = newLocation;
 						}
@@ -132,7 +135,7 @@ public class Slanderer {
 		nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam());
 		for(int i = nearbyRobots.length; --i>=0; ) {
 			RobotInfo cur = nearbyRobots[i];
-			if(cur.type==RobotType.SLANDERER) {
+			if(cur.type==RobotType.POLITICIAN) {
 				MapLocation location = cur.location;
 				cost0 -= 1.5*Math.max(0, 2-location.distanceSquaredTo(location0));
 				cost1 -= 1.5*Math.max(0, 2-location.distanceSquaredTo(location1));

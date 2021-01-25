@@ -30,9 +30,15 @@ public class Politician {
 
 	public static void initializeSlanderer() {
 		target = Slanderer.target;
+		robotController = Slanderer.robotController;
+		visited = new double[16384];
 	}
 
 	public static void initialize(RobotController robotController) throws GameActionException {
+		if(Slanderer.target!=null) {
+			initializeSlanderer();
+			return;
+		}
 		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;
 		//find EC that spawned me
