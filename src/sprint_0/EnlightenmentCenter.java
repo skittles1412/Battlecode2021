@@ -148,8 +148,12 @@ public class EnlightenmentCenter {
 //				}else {
 //					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
 //				}
-				if(robotController.getRoundNum()<=150&&robotController.getRoundNum()-lastSpawnSlanderer>=15) {
-					if(build(directions, RobotType.SLANDERER, robotController.getInfluence()/2)!=null) {
+				if(robotController.getRoundNum()<=150&&robotController.getRoundNum()-lastSpawnSlanderer>=20) {
+					int influence = robotController.getInfluence();
+					if(robotController.getRoundNum()>=75) {
+						influence /= 2;
+					}
+					if(build(directions, RobotType.SLANDERER, getSlandererInfluence(influence))!=null) {
 						lastSpawnSlanderer = robotController.getRoundNum();
 					}
 				}else {
