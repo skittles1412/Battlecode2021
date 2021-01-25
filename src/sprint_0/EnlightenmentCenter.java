@@ -37,20 +37,22 @@ public class EnlightenmentCenter {
 	public static final int EC_PREFIX_MUL = 1048576;//1<<20
 	//anti surround flag indicator
 	public static final int ANTI_SURROUND_PREFIX = 524288;//1<<19
+	//optimal influence to spawn slanderers
+	public static final int[] SLANDERER_INFLUENCE = {21, 41, 63, 85, 107, 130, 154, 178, 203, 228, 255, 282, 310, 339, 368, 399, 431, 463, 497, 532, 568, 605, 643, 683, 724, 766, 810, 855, 902, 949};
 	//did I vote last round?
 	public static boolean voted = false;
 	//next vote, last amount of votes on my team, last time I tried to vote, how much influence should I have before voting
 	public static int vote = 2, lastVoteCount, lastVoteRound = -1, minVoteInfluence = 600;
-	//politician sent to self empower
-	public static int selfEmpowerID = 0;
 	//flag to set to next round
 	public static int nextFlag = 0;
 	//minimum amount of influence that I should have
 	public static int minInfluence = 0;
 	//last time I tried to clean up spawned, the pointer of spawned (used as an arraylist)
 	public static int lastCleaned = 0, spawnInd = 0;
-	//rounds since I last attacked surrounding troops
-	public static int lastAntiSurround = 6;
+	//last round where I attacked surrounding troops
+	public static int lastAntiSurround = -100;
+	//last round where I spawned a slanderer
+	public static int lastSpawnSlanderer = -100;
 	public static int[] spawned;
 	public static RobotController robotController;
 	//attacked neutral ECs, to attack neutral ECs
@@ -125,6 +127,11 @@ public class EnlightenmentCenter {
 			communicationLogger.logBytecode(round, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 		}
 		vote();
+		for(RobotInfo robotInfo: robotController.senseNearbyRobots(-1, robotController.getTeam().opponent())) {
+			if(robotInfo.type==RobotType.MUCKRAKER) {
+				lastSpawnSlanderer = 1500;
+			}
+		}
 		//process spawning
 		//TODO: Don't spawn in future self empowering places
 		//TODO: Protect with muckrakers
@@ -141,7 +148,13 @@ public class EnlightenmentCenter {
 //				}else {
 //					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
 //				}
-				build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
+				if(robotController.getRoundNum()<=150&&robotController.getRoundNum()-lastSpawnSlanderer>=15) {
+					if(build(directions, RobotType.SLANDERER, robotController.getInfluence()/2)!=null) {
+						lastSpawnSlanderer = robotController.getRoundNum();
+					}
+				}else {
+					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
+				}
 				buildLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 			}
 		}
@@ -163,6 +176,21 @@ public class EnlightenmentCenter {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * @return the largest optimal slanderer influence less than or equal to
+	 * the provided influence, or 0, if none exist
+	 */
+	private static int getSlandererInfluence(int influence) {
+		int prev = 0;
+		for(int i: SLANDERER_INFLUENCE) {
+			if(i>influence) {
+				return prev;
+			}
+			prev = i;
+		}
+		return prev;
 	}
 
 	private static void vote() throws GameActionException {
@@ -231,14 +259,15 @@ public class EnlightenmentCenter {
 	 * @return true if a politician was build to attack surrounding units
 	 */
 	private static boolean antiSurround() throws GameActionException {
-		if(++lastAntiSurround>=6&&robotController.senseNearbyRobots(5, robotController.getTeam().opponent()).length>=4) {
+		if(robotController.getRoundNum()-lastAntiSurround>=10
+				&&robotController.senseNearbyRobots(5, robotController.getTeam().opponent()).length>=6) {
 			int maxUse = robotController.getInfluence()-minInfluence;
 			if(18<=maxUse) {
 				int influence = Math.min(maxUse, robotController.senseNearbyRobots(9).length*2+10);
 				Direction buildDirection;
 				if((buildDirection = build(directions, RobotType.POLITICIAN, influence))!=null) {
 					nextFlag = ((buildDirection.ordinal()+1)*EC_PREFIX_MUL)|ANTI_SURROUND_PREFIX;
-					lastAntiSurround = 0;
+					lastAntiSurround = robotController.getRoundNum();
 					return true;
 				}
 			}

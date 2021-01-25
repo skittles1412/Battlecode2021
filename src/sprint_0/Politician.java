@@ -28,6 +28,10 @@ public class Politician {
 	public static RobotController robotController;
 	public static final Direction[] DIRECTIONS = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
+	public static void initializeSlanderer() {
+		target = Slanderer.target;
+	}
+
 	public static void initialize(RobotController robotController) throws GameActionException {
 		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;

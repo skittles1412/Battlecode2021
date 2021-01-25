@@ -33,7 +33,7 @@ set APP_HOME=%DIRNAME%
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 @rem Find java.exe
-set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_271
+set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_281
 if defined JAVA_HOME goto findJavaFromJavaHome
 
 set JAVA_EXE=java.exe

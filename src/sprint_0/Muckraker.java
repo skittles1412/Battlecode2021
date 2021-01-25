@@ -38,7 +38,9 @@ public class Muckraker {
 		flagLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 		int roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
-		pathfind();
+		if(robotController.isReady()) {
+			pathfind();
+		}
 		pathfindLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
 
