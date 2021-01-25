@@ -25,6 +25,11 @@ public class Muckraker {
 	public static final Logger pathfindFriendlyLogger
 			= new Logger(LOG ? 200 : 0, 4, 15000, "Muckraker friendly");
 	//remove end
+	//velocity for bouncing pathfinding
+	public static double vx, vy;
+	//map locations to bounce off as an arraylist
+	public static int bounceInd = 0;
+	public static MapLocation[] toBounce;
 	public static MapLocation spawned;
 	public static RobotController robotController;
 
@@ -36,6 +41,10 @@ public class Muckraker {
 				break;
 			}
 		}
+		Direction direction = spawned.directionTo(robotController.getLocation());
+		vx = direction.dx;
+		vy = direction.dy;
+		toBounce = new MapLocation[300];
 	}
 
 	public static void processRound() throws GameActionException {
@@ -46,7 +55,11 @@ public class Muckraker {
 		int roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
 		if(robotController.isReady()) {
-			pathfind();
+			if(robotController.getRoundNum()<=300) {
+				mapExplorationPathfind();
+			}else {
+				pathfind();
+			}
 		}
 		pathfindLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
@@ -80,44 +93,15 @@ public class Muckraker {
 		MapLocation location6 = robotController.adjacentLocation(Direction.WEST);
 		MapLocation location7 = robotController.adjacentLocation(Direction.NORTHWEST);
 		MapLocation location8 = robotController.getLocation();
-		double cost0 = robotController.canMove(Direction.NORTH) ? 1.5/robotController.sensePassability(location0) : 1e10;
-		double cost1 = robotController.canMove(Direction.NORTHEAST) ? 1.5/robotController.sensePassability(location1) : 1e10;
-		double cost2 = robotController.canMove(Direction.EAST) ? 1.5/robotController.sensePassability(location2) : 1e10;
-		double cost3 = robotController.canMove(Direction.SOUTHEAST) ? 1.5/robotController.sensePassability(location3) : 1e10;
-		double cost4 = robotController.canMove(Direction.SOUTH) ? 1.5/robotController.sensePassability(location4) : 1e10;
-		double cost5 = robotController.canMove(Direction.SOUTHWEST) ? 1.5/robotController.sensePassability(location5) : 1e10;
-		double cost6 = robotController.canMove(Direction.WEST) ? 1.5/robotController.sensePassability(location6) : 1e10;
-		double cost7 = robotController.canMove(Direction.NORTHWEST) ? 1.5/robotController.sensePassability(location7) : 1e10;
+		double cost0 = robotController.canMove(Direction.NORTH) ? 2/robotController.sensePassability(location0) : 1e10;
+		double cost1 = robotController.canMove(Direction.NORTHEAST) ? 2/robotController.sensePassability(location1) : 1e10;
+		double cost2 = robotController.canMove(Direction.EAST) ? 2/robotController.sensePassability(location2) : 1e10;
+		double cost3 = robotController.canMove(Direction.SOUTHEAST) ? 2/robotController.sensePassability(location3) : 1e10;
+		double cost4 = robotController.canMove(Direction.SOUTH) ? 2/robotController.sensePassability(location4) : 1e10;
+		double cost5 = robotController.canMove(Direction.SOUTHWEST) ? 2/robotController.sensePassability(location5) : 1e10;
+		double cost6 = robotController.canMove(Direction.WEST) ? 2/robotController.sensePassability(location6) : 1e10;
+		double cost7 = robotController.canMove(Direction.NORTHWEST) ? 2/robotController.sensePassability(location7) : 1e10;
 		double cost8 = robotController.sensePassability(location8);
-
-		//explore the map more in early rounds
-		if(robotController.getRoundNum()<250) {
-			int cdist = spawned.distanceSquaredTo(location8);
-			if(spawned.distanceSquaredTo(location0)<cdist) {
-				cost0 += 10;
-			}
-			if(spawned.distanceSquaredTo(location1)<cdist) {
-				cost1 += 10;
-			}
-			if(spawned.distanceSquaredTo(location2)<cdist) {
-				cost2 += 10;
-			}
-			if(spawned.distanceSquaredTo(location3)<cdist) {
-				cost3 += 10;
-			}
-			if(spawned.distanceSquaredTo(location4)<cdist) {
-				cost4 += 10;
-			}
-			if(spawned.distanceSquaredTo(location5)<cdist) {
-				cost5 += 10;
-			}
-			if(spawned.distanceSquaredTo(location6)<cdist) {
-				cost6 += 10;
-			}
-			if(spawned.distanceSquaredTo(location7)<cdist) {
-				cost7 += 10;
-			}
-		}
 
 		int roundBegin = robotController.getRoundNum();//remove line
 		int start = Clock.getBytecodeNum();//remove line
@@ -263,5 +247,108 @@ public class Muckraker {
 		if(min<1e9) {
 			robotController.move(moveDirection);
 		}
+	}
+
+	/**
+	 * Pathfinding using muckraker bouncing.
+	 */
+	private static void mapExplorationPathfind() throws GameActionException {
+		bounceInd = 0;
+		MapLocation myLocation = robotController.getLocation();
+		int leftBorder = getBoundary(robotController.onTheMap(myLocation.translate(-1, 0)),
+				robotController.onTheMap(myLocation.translate(-2, 0)),
+				robotController.onTheMap(myLocation.translate(-3, 0)),
+				robotController.onTheMap(myLocation.translate(-4, 0)),
+				robotController.onTheMap(myLocation.translate(-5, 0)));
+		int rightBorder = getBoundary(robotController.onTheMap(myLocation.translate(1, 0)),
+				robotController.onTheMap(myLocation.translate(2, 0)),
+				robotController.onTheMap(myLocation.translate(3, 0)),
+				robotController.onTheMap(myLocation.translate(4, 0)),
+				robotController.onTheMap(myLocation.translate(5, 0)));
+		int bottomBorder = getBoundary(robotController.onTheMap(myLocation.translate(0, -1)),
+				robotController.onTheMap(myLocation.translate(0, -2)),
+				robotController.onTheMap(myLocation.translate(0, -3)),
+				robotController.onTheMap(myLocation.translate(0, -4)),
+				robotController.onTheMap(myLocation.translate(0, -5)));
+		int topBorder = getBoundary(robotController.onTheMap(myLocation.translate(0, 1)),
+				robotController.onTheMap(myLocation.translate(0, 2)),
+				robotController.onTheMap(myLocation.translate(0, 3)),
+				robotController.onTheMap(myLocation.translate(0, 4)),
+				robotController.onTheMap(myLocation.translate(0, 5)));
+		leftBorder++;
+		rightBorder++;
+		bottomBorder++;
+		topBorder++;
+		if(leftBorder<5) {
+			toBounce[bounceInd++] = myLocation.translate(-leftBorder, 0);
+		}
+		if(rightBorder<5) {
+			toBounce[bounceInd++] = myLocation.translate(rightBorder, 0);
+		}
+		if(bottomBorder<5) {
+			toBounce[bounceInd++] = myLocation.translate(0, -bottomBorder);
+		}
+		if(topBorder<5) {
+			toBounce[bounceInd++] = myLocation.translate(0, topBorder);
+		}
+		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam());
+		for(int i = nearbyRobots.length; --i>=0; ) {
+			RobotInfo robotInfo = nearbyRobots[i];
+			if(robotInfo.type==RobotType.MUCKRAKER&&robotInfo.location.distanceSquaredTo(spawned)>2) {
+				toBounce[bounceInd++] = robotInfo.location;
+			}
+		}
+		int x = myLocation.x, y = myLocation.y;
+		for(int i = bounceInd; --i>=0; ) {
+			MapLocation location = toBounce[i];
+			double dist = location.distanceSquaredTo(myLocation);
+			vx += (x-location.x)/dist;
+			vy += (y-location.y)/dist;
+		}
+		if(robotController.isReady()) {
+			Direction direction = myLocation.directionTo(
+					myLocation.translate((int) Math.round(vx), (int) Math.round(vy)));
+			Direction left = direction.rotateLeft();
+			Direction right = direction.rotateRight();
+			double cost0 = robotController.canMove(direction) ? robotController.sensePassability(robotController.adjacentLocation(direction)) : -1;
+			double cost1 = robotController.canMove(left) ? robotController.sensePassability(robotController.adjacentLocation(left)) : -1;
+			double cost2 = robotController.canMove(right) ? robotController.sensePassability(robotController.adjacentLocation(right)) : -1;
+			Direction moveDirection = direction;
+			double max = cost0;
+			if(cost1>max) {
+				max = cost1;
+				moveDirection = left;
+			}
+			if(cost2>max) {
+				moveDirection = right;
+			}
+			if(robotController.canMove(moveDirection)) {
+				robotController.move(moveDirection);
+			}
+		}
+	}
+
+	/**
+	 * arr must have length 5 and its prefix must be true and its suffix must be false
+	 *
+	 * @return The first value of arr that is false, or 5, if none exist
+	 */
+	private static int getBoundary(boolean... arr) {
+		if(arr[4]) {
+			return 5;
+		}
+		if(arr[3]) {
+			return 4;
+		}
+		if(arr[2]) {
+			return 3;
+		}
+		if(arr[1]) {
+			return 2;
+		}
+		if(arr[0]) {
+			return 1;
+		}
+		return 0;
 	}
 }
