@@ -25,10 +25,17 @@ public class Muckraker {
 	public static final Logger pathfindFriendlyLogger
 			= new Logger(LOG ? 200 : 0, 4, 15000, "Muckraker friendly");
 	//remove end
+	public static MapLocation spawned;
 	public static RobotController robotController;
 
 	public static void initialize(RobotController robotController) {
 		Muckraker.robotController = robotController;
+		for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
+			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
+				spawned = robotInfo.location;
+				break;
+			}
+		}
 	}
 
 	public static void processRound() throws GameActionException {
@@ -82,6 +89,35 @@ public class Muckraker {
 		double cost6 = robotController.canMove(Direction.WEST) ? 1.5/robotController.sensePassability(location6) : 1e10;
 		double cost7 = robotController.canMove(Direction.NORTHWEST) ? 1.5/robotController.sensePassability(location7) : 1e10;
 		double cost8 = robotController.sensePassability(location8);
+
+		//explore the map more in early rounds
+		if(robotController.getRoundNum()<250) {
+			int cdist = spawned.distanceSquaredTo(location8);
+			if(spawned.distanceSquaredTo(location0)<cdist) {
+				cost0 += 10;
+			}
+			if(spawned.distanceSquaredTo(location1)<cdist) {
+				cost1 += 10;
+			}
+			if(spawned.distanceSquaredTo(location2)<cdist) {
+				cost2 += 10;
+			}
+			if(spawned.distanceSquaredTo(location3)<cdist) {
+				cost3 += 10;
+			}
+			if(spawned.distanceSquaredTo(location4)<cdist) {
+				cost4 += 10;
+			}
+			if(spawned.distanceSquaredTo(location5)<cdist) {
+				cost5 += 10;
+			}
+			if(spawned.distanceSquaredTo(location6)<cdist) {
+				cost6 += 10;
+			}
+			if(spawned.distanceSquaredTo(location7)<cdist) {
+				cost7 += 10;
+			}
+		}
 
 		int roundBegin = robotController.getRoundNum();//remove line
 		int start = Clock.getBytecodeNum();//remove line
