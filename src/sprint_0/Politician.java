@@ -90,7 +90,9 @@ public class Politician {
 					robotController.empower(dist);
 				}
 			}else {
-				if((dist==1&&++tries==5)||robotInfo.influence+1<=(robotController.getConviction()-10)/robotController.senseNearbyRobots(dist).length) {
+				if((dist==1&&++tries==5)||robotInfo.influence+1<=
+						((robotController.getConviction()-10)*robotController.getEmpowerFactor(robotController.getTeam(), 0))
+								/robotController.senseNearbyRobots(dist).length) {
 					robotController.empower(dist);
 				}
 			}
@@ -107,7 +109,8 @@ public class Politician {
 		}
 		//TODO: maybe account for non 1 influence mucks
 		for(int i = 1; i<=9; i++) {
-			if((robotController.getConviction()-10)/Math.max(1, robotController.senseNearbyRobots(i).length)<2) {
+			if(((robotController.getConviction()-10)*robotController.getEmpowerFactor(robotController.getTeam(), 0))
+					/Math.max(1, robotController.senseNearbyRobots(i).length)<2) {
 				robotController.empower(i-1);
 			}
 		}
