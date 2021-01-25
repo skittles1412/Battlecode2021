@@ -1,3 +1,9 @@
+7:
+Spawn slanderers less frequently but with more influence in first 50 rounds
+Heuristic improvement for slanderers and muckrakers
+Bouncing map exploration pathfinding for muckrakers
+Account for buff when polis empower
+
 6:
 Spawn slanderers in first 150 rounds
 Encourage muckrakers to get farther away from its spawning EC
