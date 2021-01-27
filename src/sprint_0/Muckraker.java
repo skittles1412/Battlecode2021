@@ -47,16 +47,7 @@ public class Muckraker {
 		flagLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 		int roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
-		if(robotController.isReady()) {
-			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(9, robotController.getTeam().opponent());
-			for(int i = nearbyRobots.length-1; --i>=0; ) {
-				if(nearbyRobots[i].type==RobotType.SLANDERER) {
-					robotController.expose(nearbyRobots[i].ID);
-					return;
-				}
-			}
-			mapExplorationPathfind();
-		}
+		mapExplorationPathfind();
 		pathfindLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
 
@@ -317,6 +308,18 @@ public class Muckraker {
 					if(robotInfo.conviction<=10||robotController.getFlag(robotInfo.ID)==1) {
 						toRepel[bounceInd++] = robotInfo.location;
 					}
+			}
+		}
+		nearbyRobots = robotController.senseNearbyRobots(9, robotController.getTeam().opponent());
+		for(int i = nearbyRobots.length-1; --i>=0; ) {
+			if(nearbyRobots[i].type==RobotType.SLANDERER) {
+				if(robotController.isReady()) {
+					robotController.expose(nearbyRobots[i].ID);
+					return;
+				}
+				MapLocation location = nearbyRobots[i].location;
+				toRepel[bounceInd++] = myLocation.translate(myLocation.x-location.x, myLocation.y-location.y);
+				toRepel[bounceInd++] = myLocation.translate(myLocation.x-location.x, myLocation.y-location.y);
 			}
 		}
 		for(int i = bounceInd; --i>=0; ) {
