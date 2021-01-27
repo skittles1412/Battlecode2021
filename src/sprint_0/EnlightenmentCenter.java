@@ -1,6 +1,7 @@
 package sprint_0;
 
 import battlecode.common.*;
+import eco.Muckraker;
 import utilities.Communications;
 import utilities.FastRandom;
 import utilities.IntHashMap;
@@ -289,6 +290,9 @@ public class EnlightenmentCenter {
 				if(flag!=0) {
 					int influence = decodePrefix(flag);
 					if(influence>=50) {
+						if((influence&eco.Muckraker.ENEMY_EC_PREFIX)>0) {
+							influence = (int) Math.ceil(Math.pow(1.1, influence-eco.Muckraker.ENEMY_EC_PREFIX)*1.3);
+						}
 						flag %= Communications.PREFIX_MUL;
 						int assignee = processedECs.get(flag);
 						if(assignee==0) {
@@ -317,6 +321,9 @@ public class EnlightenmentCenter {
 				if(flag!=0) {
 					int influence = decodePrefix(flag);
 					if(influence>=50) {
+						if((influence&eco.Muckraker.ENEMY_EC_PREFIX)>0) {
+							influence = (int) Math.ceil(Math.pow(1.1, influence-Muckraker.ENEMY_EC_PREFIX)*1.3);
+						}
 						flag %= Communications.PREFIX_MUL;
 						int assignee = processedECs.get(flag);
 						if(assignee==0) {

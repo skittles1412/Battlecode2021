@@ -4,7 +4,8 @@ import battlecode.common.*;
 import utilities.FastRandom;
 import utilities.Logger;
 
-import static utilities.Communications.*;
+import static utilities.Communications.encodeLocation;
+import static utilities.Communications.encodePrefix;
 
 /**
  * <p><dt><strong>Communications:</strong></dt>
@@ -25,48 +26,29 @@ public class Muckraker {
 	public static final Logger pathfindFriendlyLogger
 			= new Logger(LOG ? 200 : 0, 4, 15000, "Muckraker friendly");
 	//remove end
+	//bit to set in prefix which indicates that the communicated EC isn't neutral
+	public static final int ENEMY_EC_PREFIX = 512; //1<<9
 	//velocity for bouncing pathfinding
-	public static double vx, vy;
+	public static double vx = 0, vy = 0;
 	//map locations to bounce off as an arraylist
 	public static int bounceInd = 0;
-	public static MapLocation[] toBounce;
-	public static MapLocation spawned;
+	public static MapLocation[] toRepel;
 	public static RobotController robotController;
 
 	public static void initialize(RobotController robotController) {
-		Muckraker.robotController = robotController;
-		for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
-			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
-				spawned = robotInfo.location;
-				break;
-			}
-		}
-		Direction direction = spawned.directionTo(robotController.getLocation());
-		vx = direction.dx;
-		vy = direction.dy;
-		toBounce = new MapLocation[300];
+		eco.Muckraker.robotController = robotController;
+		toRepel = new MapLocation[300];
 	}
 
 	public static void processRound() throws GameActionException {
 		//TODO: surround enemy politicians
 		int start = Clock.getBytecodeNum();//remove line
-		processNeutralECs();
+		processECs();
 		flagLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 		int roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
 		if(robotController.isReady()) {
-			if(robotController.getRoundNum()<=300) {
-				RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
-				for(int i = nearbyRobots.length; --i>=0; ) {
-					if(nearbyRobots[i].type==RobotType.SLANDERER) {
-						robotController.expose(nearbyRobots[i].ID);
-						return;
-					}
-				}
-				mapExplorationPathfind();
-			}else {
-				pathfind();
-			}
+			mapExplorationPathfind();
 		}
 		pathfindLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
 	}
@@ -74,13 +56,26 @@ public class Muckraker {
 	/**
 	 * Communicates neutral ECs.
 	 */
-	private static void processNeutralECs() throws GameActionException {
+	public static void processECs() throws GameActionException {
 		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, Team.NEUTRAL);
 		if(nearbyRobots.length>0) {
 			RobotInfo robotInfo = nearbyRobots[FastRandom.nextInt(nearbyRobots.length)];
 			robotController.setFlag(encodePrefix(robotInfo.influence, encodeLocation(robotInfo.location)));
 		}else {
-			robotController.setFlag(0);
+			nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+			for(int i = nearbyRobots.length; --i>=0; ) {
+				RobotInfo robotInfo = nearbyRobots[i];
+				if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
+					int influence = robotInfo.influence, flagInfluence = 1;
+					for( ; ; flagInfluence++) {
+						if(Math.pow(1.1, flagInfluence)>influence) {
+							flagInfluence--;
+							break;
+						}
+					}
+					robotController.setFlag(encodePrefix(ENEMY_EC_PREFIX|flagInfluence, encodeLocation(robotInfo.location)));
+				}
+			}
 		}
 	}
 
@@ -259,7 +254,7 @@ public class Muckraker {
 	/**
 	 * Pathfinding using muckraker bouncing.
 	 */
-	private static void mapExplorationPathfind() throws GameActionException {
+	public static void mapExplorationPathfind() throws GameActionException {
 		bounceInd = 0;
 		MapLocation myLocation = robotController.getLocation();
 		int leftBorder = getBoundary(robotController.onTheMap(myLocation.translate(-1, 0)),
@@ -287,26 +282,38 @@ public class Muckraker {
 		bottomBorder++;
 		topBorder++;
 		if(leftBorder<5) {
-			toBounce[bounceInd++] = myLocation.translate(-leftBorder, 0);
+			toRepel[bounceInd++] = myLocation.translate(-leftBorder, 0);
+			toRepel[bounceInd++] = myLocation.translate(-leftBorder, 0);
 		}
 		if(rightBorder<5) {
-			toBounce[bounceInd++] = myLocation.translate(rightBorder, 0);
+			toRepel[bounceInd++] = myLocation.translate(rightBorder, 0);
+			toRepel[bounceInd++] = myLocation.translate(rightBorder, 0);
 		}
 		if(bottomBorder<5) {
-			toBounce[bounceInd++] = myLocation.translate(0, -bottomBorder);
+			toRepel[bounceInd++] = myLocation.translate(0, -bottomBorder);
+			toRepel[bounceInd++] = myLocation.translate(0, -bottomBorder);
 		}
 		if(topBorder<5) {
-			toBounce[bounceInd++] = myLocation.translate(0, topBorder);
+			toRepel[bounceInd++] = myLocation.translate(0, topBorder);
+			toRepel[bounceInd++] = myLocation.translate(0, topBorder);
 		}
 		RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam());
 		for(int i = nearbyRobots.length; --i>=0; ) {
 			RobotInfo robotInfo = nearbyRobots[i];
-			if(robotInfo.type==RobotType.MUCKRAKER&&robotInfo.location.distanceSquaredTo(spawned)>2) {
-				toBounce[bounceInd++] = robotInfo.location;
+			switch(robotInfo.type) {
+				case ENLIGHTENMENT_CENTER:
+					toRepel[bounceInd++] = robotInfo.location;
+				case MUCKRAKER:
+					toRepel[bounceInd++] = robotInfo.location;
+					break;
+				case POLITICIAN:
+					if(robotInfo.conviction<=10||robotController.getFlag(robotInfo.ID)==1) {
+						toRepel[bounceInd++] = robotInfo.location;
+					}
 			}
 		}
 		for(int i = bounceInd; --i>=0; ) {
-			MapLocation location = toBounce[i];
+			MapLocation location = toRepel[i];
 			Direction direction = location.directionTo(myLocation);
 			double dist = location.distanceSquaredTo(myLocation);
 			vx += 5*direction.dx/dist;
