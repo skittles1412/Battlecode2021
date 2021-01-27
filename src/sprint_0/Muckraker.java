@@ -56,6 +56,13 @@ public class Muckraker {
 		start = Clock.getBytecodeNum();//remove line
 		if(robotController.isReady()) {
 			if(robotController.getRoundNum()<=300) {
+				RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+				for(int i = nearbyRobots.length; --i>=0; ) {
+					if(nearbyRobots[i].type==RobotType.SLANDERER) {
+						robotController.expose(nearbyRobots[i].ID);
+						return;
+					}
+				}
 				mapExplorationPathfind();
 			}else {
 				pathfind();
@@ -298,12 +305,12 @@ public class Muckraker {
 				toBounce[bounceInd++] = robotInfo.location;
 			}
 		}
-		int x = myLocation.x, y = myLocation.y;
 		for(int i = bounceInd; --i>=0; ) {
 			MapLocation location = toBounce[i];
+			Direction direction = location.directionTo(myLocation);
 			double dist = location.distanceSquaredTo(myLocation);
-			vx += (x-location.x)/dist;
-			vy += (y-location.y)/dist;
+			vx += 5*direction.dx/dist;
+			vy += 5*direction.dy/dist;
 		}
 		if(robotController.isReady()) {
 			Direction direction = myLocation.directionTo(

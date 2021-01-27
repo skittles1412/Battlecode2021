@@ -98,7 +98,7 @@ public class Slanderer {
 						MapLocation newLocation = location8.translate(i, j);
 						RobotInfo robotInfo;
 						if(target.distanceSquaredTo(newLocation)>2&&robotController.canSenseLocation(newLocation)
-								&&((robotInfo=robotController.senseRobotAtLocation(newLocation))==null
+								&&((robotInfo = robotController.senseRobotAtLocation(newLocation))==null
 								||(robotInfo.type!=RobotType.POLITICIAN&&robotInfo.type!=RobotType.ENLIGHTENMENT_CENTER))
 								&&location8.distanceSquaredTo(newLocation)<location8.distanceSquaredTo(foundLocation)) {
 							foundLocation = newLocation;
