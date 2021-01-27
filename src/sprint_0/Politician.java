@@ -39,6 +39,7 @@ public class Politician {
 			initializeSlanderer();
 			return;
 		}
+		Muckraker.initialize(robotController);
 		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;
 		//find EC that spawned me
@@ -68,7 +69,11 @@ public class Politician {
 
 	public static void processRound() throws GameActionException {
 		if(antiSurround) {
-			processSurround();
+			if(robotController.getConviction()<=15) {
+				processPathfind();
+			}else {
+				processSurround();
+			}
 			return;
 		}
 		//calculate flags
@@ -101,6 +106,13 @@ public class Politician {
 		int start = Clock.getBytecodeNum();//remove line
 		pathfind();
 		pathfindingLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
+	}
+
+	private static void processPathfind() throws GameActionException {
+		robotController.setFlag(1);
+		if(robotController.isReady()) {
+			Muckraker.mapExplorationPathfind();
+		}
 	}
 
 	private static void processSurround() throws GameActionException {
