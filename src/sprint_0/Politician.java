@@ -63,7 +63,9 @@ public class Politician {
 			}
 			antiSurround = true;
 		}
-		visited = new double[16384];
+		if(!antiSurround) {
+			visited = new double[16384];
+		}
 		initializationLogger.logBytecode(roundBegin, robotController.getRoundNum(), 0, Clock.getBytecodeNum());//remove line
 	}
 

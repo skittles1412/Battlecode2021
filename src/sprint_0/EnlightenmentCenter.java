@@ -64,6 +64,7 @@ public class EnlightenmentCenter {
 	public static Direction[] directions = {Direction.NORTH, Direction.NORTHEAST, Direction.EAST, Direction.SOUTHEAST, Direction.SOUTH, Direction.SOUTHWEST, Direction.WEST, Direction.NORTHWEST};
 
 	public static void initialize(RobotController robotController) throws GameActionException {
+		int roundBegin = robotController.getRoundNum();//remove line
 		EnlightenmentCenter.robotController = robotController;
 		spawned = new int[750];
 		myLocationFlag = encodeLocation(myLocation = robotController.getLocation());
@@ -93,7 +94,7 @@ public class EnlightenmentCenter {
 				cardinalDirections[j+1] = tmp;
 			}
 		}
-		initializationLogger.logBytecode(Clock.getBytecodeNum());//remove line
+		initializationLogger.logBytecode(roundBegin, robotController.getRoundNum(), 0, Clock.getBytecodeNum());//remove line
 	}
 
 	public static void processRound() throws GameActionException {
