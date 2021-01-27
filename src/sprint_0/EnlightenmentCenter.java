@@ -148,7 +148,7 @@ public class EnlightenmentCenter {
 //				}else {
 //					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
 //				}
-				if(robotController.getRoundNum()<=150&&robotController.getRoundNum()-lastSpawnSlanderer>=20) {
+				if(robotController.getRoundNum()-lastSpawnSlanderer>=12) {
 					int influence = robotController.getInfluence();
 					if(robotController.getRoundNum()>=75) {
 						influence /= 2;
