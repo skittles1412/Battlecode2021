@@ -75,10 +75,11 @@ public class Submit {
 						String importPath = importedClass.replace('.', '/');
 						if(IMPORT_STATIC.matcher(line).find()) {
 							String[] imports = importedClass.split("\\.");
-							String newImport = imports[imports.length-1];
+							String newImport = imports[imports.length-2]+"."+imports[imports.length-1];
 							if(importPath.endsWith("/*")) {
 								importPath = importPath.substring(0, importPath.length()-2);
-								newImport = imports[imports.length-2]+"."+newImport;
+							}else {
+								importPath = importPath.substring(0, importPath.lastIndexOf('/'));
 							}
 							line = line.substring(0, matcher.start(1))+folder+"."+newImport+line.substring(matcher.end(1));
 						}else {
@@ -162,7 +163,13 @@ public class Submit {
 			System.out.println("Processing "+path);
 			if(file.isDirectory()) {
 				for(File child: file.listFiles()) {
-					toProcessFiles.addFirst(new ToProcessFile(child, path+"/"+child.getName()));
+					String importPath = path+"/"+child.getName();
+					if(!processedFiles.contains(importPath)) {
+						processedFiles.add(importPath);
+						toProcessFiles.addFirst(new ToProcessFile(child, importPath));
+					}else {
+						System.out.println("Error. You have imported multiple classes with the same name.");
+					}
 				}
 			}else {
 				out.putNextEntry(new ZipEntry(path));
