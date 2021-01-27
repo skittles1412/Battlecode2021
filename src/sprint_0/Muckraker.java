@@ -48,6 +48,12 @@ public class Muckraker {
 		int roundBegin = robotController.getRoundNum();//remove line
 		start = Clock.getBytecodeNum();//remove line
 		if(robotController.isReady()) {
+			RobotInfo[] nearbyRobots = robotController.senseNearbyRobots(-1, robotController.getTeam().opponent());
+			for(int i = nearbyRobots.length-1; --i>=0; ) {
+				if(nearbyRobots[i].type==RobotType.SLANDERER) {
+					robotController.expose(nearbyRobots[i].ID);
+				}
+			}
 			mapExplorationPathfind();
 		}
 		pathfindLogger.logBytecode(roundBegin, robotController.getRoundNum(), start, Clock.getBytecodeNum());//remove line
