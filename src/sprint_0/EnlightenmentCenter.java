@@ -157,7 +157,11 @@ public class EnlightenmentCenter {
 						lastSpawnSlanderer = robotController.getRoundNum();
 					}
 				}else {
-					build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
+					if(robotController.getRoundNum()<=300&&FastRandom.nextInt(3)==0) {
+						build(directions, RobotType.POLITICIAN, 1);
+					}else {
+						build(directions, RobotType.MUCKRAKER, FastRandom.nextInt(3)+1);
+					}
 				}
 				buildLogger.logBytecode(start, Clock.getBytecodeNum());//remove line
 			}
