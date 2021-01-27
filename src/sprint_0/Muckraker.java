@@ -36,7 +36,7 @@ public class Muckraker {
 	public static RobotController robotController;
 
 	public static void initialize(RobotController robotController) {
-		eco.Muckraker.robotController = robotController;
+		Muckraker.robotController = robotController;
 		toRepel = new MapLocation[300];
 	}
 
