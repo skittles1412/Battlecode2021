@@ -35,11 +35,11 @@ public class Politician {
 	}
 
 	public static void initialize(RobotController robotController) throws GameActionException {
+		Muckraker.initialize(robotController);
 		if(Slanderer.target!=null) {
 			initializeSlanderer();
 			return;
 		}
-		Muckraker.initialize(robotController);
 		int roundBegin = robotController.getRoundNum();//remove line
 		Politician.robotController = robotController;
 		//find EC that spawned me
