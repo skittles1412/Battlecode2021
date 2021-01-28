@@ -263,7 +263,7 @@ public class Muckraker {
 	public static void mapExplorationPathfind() throws GameActionException {
 		bounceInd = 0;
 		MapLocation myLocation = robotController.getLocation();
-		if(myLocation.isWithinDistanceSquared(spawned, 2)) {
+		if(spawned!=null&&myLocation.isWithinDistanceSquared(spawned, 2)) {
 			RobotInfo ec = robotController.senseRobotAtLocation(spawned);
 			if(ec.team==robotController.getTeam()) {
 				int influence = ec.influence-25;
