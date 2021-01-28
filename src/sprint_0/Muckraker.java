@@ -32,12 +32,20 @@ public class Muckraker {
 	public static double vx = 0, vy = 0;
 	//map locations to bounce off as an arraylist
 	public static int bounceInd = 0;
+	//EC that spawned me
+	public static MapLocation spawned;
 	public static MapLocation[] toRepel;
 	public static RobotController robotController;
 
 	public static void initialize(RobotController robotController) {
 		Muckraker.robotController = robotController;
 		toRepel = new MapLocation[300];
+		for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam())) {
+			if(robotInfo.type==RobotType.ENLIGHTENMENT_CENTER) {
+				spawned = robotInfo.location;
+				return;
+			}
+		}
 	}
 
 	public static void processRound() throws GameActionException {
@@ -255,6 +263,17 @@ public class Muckraker {
 	public static void mapExplorationPathfind() throws GameActionException {
 		bounceInd = 0;
 		MapLocation myLocation = robotController.getLocation();
+		if(myLocation.isWithinDistanceSquared(spawned, 2)) {
+			RobotInfo ec = robotController.senseRobotAtLocation(spawned);
+			if(ec.team==robotController.getTeam()) {
+				int influence = ec.influence-25;
+				for(RobotInfo robotInfo: robotController.senseNearbyRobots(2, robotController.getTeam().opponent())) {
+					if(robotInfo.type==RobotType.POLITICIAN&&robotInfo.influence>=influence) {
+						return;
+					}
+				}
+			}
+		}
 		int leftBorder = getBoundary(robotController.onTheMap(myLocation.translate(-1, 0)),
 				robotController.onTheMap(myLocation.translate(-2, 0)),
 				robotController.onTheMap(myLocation.translate(-3, 0)),
