@@ -1,0 +1,28 @@
+7:
+Spawn slanderers less frequently but with more influence in first 50 rounds
+Heuristic improvement for slanderers and muckrakers
+Bouncing map exploration pathfinding for muckrakers
+Account for buff when polis empower
+
+6:
+Spawn slanderers in first 150 rounds
+Encourage muckrakers to get farther away from its spawning EC
+
+5:
+Remove self empower
+
+4:
+Fix 0 influence neutral EC bug
+Create a minimum influence before voting
+Spawn politicians to prevent EC from getting surrounded
+Improve politician pathfinding by adding a cost to visited tiles
+
+3:
+EC now has min influence, which decides the amount of influence it must have before bidding or attacking a neutral EC.
+Politician only sets flag when countdown < 4
+
+2:
+EC bids a random number from 1-3 with a 50% chance when running out of influence
+Target all neutral ECs
+Change EC communication system
+Remove muckraker pathfinding flag
